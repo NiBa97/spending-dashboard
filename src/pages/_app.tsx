@@ -16,5 +16,4 @@ const MyApp: AppType<{ session: Session | null }> = ({
     </SessionProvider>
   );
 };
-
 export default api.withTRPC(MyApp);
