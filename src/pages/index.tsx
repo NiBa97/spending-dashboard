@@ -9,7 +9,9 @@ import { RouterOutputs, api } from "~/utils/api";
 import { Accordion, AccordionItem, AccordionItemHeading, AccordionItemButton, AccordionItemPanel } from 'react-accessible-accordion';
 
 type Payment = RouterOutputs["payment"]["getAll"][number];
+
 import { FaEdit, FaTrash, FaArrowUp, FaArrowDown, FaCalendarAlt } from 'react-icons/fa';
+
 
 const ViewPayment = (props: { payment: Payment }) => {
   const { name, amount, imgurl, date } = props.payment;
@@ -50,7 +52,7 @@ const ViewPayment = (props: { payment: Payment }) => {
           <p className="text-md">{date.toDateString()}</p>
         </div>
         <div className="flex space-x-2">
-          <FaEdit onClick={handleEdit} className="text-md cursor-pointer" />
+          <CreatePaymentModal payment={props.payment} />
           <FaTrash onClick={handleDelete} className="cursor-pointer text-red-500 text-md" />
         </div>
       </div>
@@ -72,12 +74,21 @@ const ViewPayment = (props: { payment: Payment }) => {
   );
 };
 
-const CreatePaymentModal = () => {
+
+const CreatePaymentModal = (props: { payment?: Payment }) => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
+
+  const handlePaymentCreation = () => {
+    // Create the payment here
+    // After the payment is successfully created, close the modal
+    setModalIsOpen(false);
+  };
 
   return (
     <div>
-      <button className="text-white" onClick={() => setModalIsOpen(true)}>+ Add payment</button>
+      {props.payment ? <FaEdit onClick={() => setModalIsOpen(true)} className="text-md cursor-pointer" /> :
+        <button className="text-white" onClick={() => setModalIsOpen(true)}>+ Add payment</button>
+      }
       <Modal
         isOpen={modalIsOpen}
         onRequestClose={() => setModalIsOpen(false)}
@@ -95,13 +106,16 @@ const CreatePaymentModal = () => {
           },
         }}
       >
-        <CreatePayment />
+        {
+          props.payment ? <UpdatePayment _payment={props.payment} onPaymentUpdate={handlePaymentCreation} /> : <CreatePayment onPaymentCreation={handlePaymentCreation} />
+        }
+
       </Modal>
     </div>
   );
 };
 
-const CreatePayment = () => {
+const CreatePayment = ({ onPaymentCreation }: { onPaymentCreation: () => void }) => {
   // Give me the next auth user session 
   const { data: sessionData } = useSession();
 
@@ -110,7 +124,7 @@ const CreatePayment = () => {
     amount: 0,
     date: new Date(),
     name: '',
-    imgurl: '',
+    isRecurring: false,
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -120,7 +134,6 @@ const CreatePayment = () => {
         ...payment,
         [e.target.name]: parseInt(e.target.value)
       });
-      // close modal
 
       return;
     }
@@ -141,6 +154,7 @@ const CreatePayment = () => {
   const { mutate, isLoading: isPosting } = api.payment.create.useMutation({
     onSuccess: () => {
       void ctx.payment.getAll.invalidate();
+      onPaymentCreation();
     },
     onError: (e) => {
       const errorMessage = e.data?.zodError?.fieldErrors.content;
@@ -185,6 +199,90 @@ const CreatePayment = () => {
   );
 };
 
+interface UpdatePaymentProps {
+  _payment: Payment;
+  onPaymentUpdate: () => void;
+}
+
+const UpdatePayment = ({ _payment, onPaymentUpdate }: UpdatePaymentProps) => {
+  // Give me the next auth user session 
+  const { data: sessionData } = useSession();
+
+  //wrap the input payment element in a state to be modifyable from the user
+  const [payment, setPayment] = useState(_payment);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //Set the correct type of the input on the state payment
+    if (e.target.name === "amount") {
+      setPayment({
+        ...payment,
+        amount: parseInt(e.target.value)
+      });
+
+      return;
+    } else if (e.target.name === "date") {
+      setPayment({
+        ...payment,
+        date: new Date(e.target.value)
+      });
+      return;
+    }
+    setPayment({
+      ...payment,
+      name: e.target.value
+    });
+  };
+
+  const ctx = api.useContext();
+
+  const { mutate, isLoading: isPosting } = api.payment.update.useMutation({
+    onSuccess: () => {
+      void ctx.payment.getForYear.invalidate();
+      onPaymentUpdate();
+    },
+    onError: (e) => {
+      const errorMessage = e.data?.zodError?.fieldErrors.content;
+      if (errorMessage && errorMessage[0]) {
+        toast.error(errorMessage[0]);
+      } else {
+        toast.error("Failed to post! Please try again later.");
+      }
+    },
+  });
+
+  if (!sessionData) return null;
+
+  return (
+
+    <div className="flex flex-col w-full gap-3 p-4 bg-white rounded shadow">
+      <h1 className="text-2xl font-bold text-center">Update Payment</h1>
+      <div className="flex flex-col gap-3">
+
+        <div>
+          <label className="block text-sm font-bold text-gray-700">Name:</label>
+          <input className="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none" type="text" name="name" onChange={handleChange} value={payment.name} />
+        </div>
+        <div>
+          <label className="block text-sm font-bold text-gray-700">Amount:</label>
+          <input className="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none" type="number" name="amount" onChange={handleChange} value={payment.amount} />
+        </div>
+        <div>
+          <label className="block text-sm font-bold text-gray-700">Date:</label>
+          <input className="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none" type="date" name="date" onChange={handleChange} value={payment.date.toISOString().slice(0, 10)} />
+        </div>
+      </div>
+      {!isPosting && (
+        <button className="px-4 py-2 mt-4 font-bold text-white bg-blue-500 rounded hover:bg-blue-700" onClick={() => mutate({ ...payment })}>Post</button>
+      )}
+      {isPosting && (
+        <div className="flex items-center justify-center mt-4 text-blue-500">
+          Loading...
+        </div>
+      )}
+    </div>
+  );
+};
+
 // Function to calculate sum of payments
 function calculateSum(payments: Payment[]) {
   return payments.reduce((sum, payment) => sum + payment.amount, 0);
@@ -208,11 +306,13 @@ function groupByMonth(payments: Payment[]) {
 
 export default function Home() {
 
-  const { data } = api.payment.getAll.useQuery();
+  const [year, setYear] = useState(new Date().getFullYear());
+
+  var { data: firstPayment } = api.payment.getFirstPayment.useQuery();
+  const { data: payments } = api.payment.getForYear.useQuery({ year });
 
   // In your component
-  const groupedPayments = groupByMonth(data ?? []);
-  console.log(data)
+  const groupedPayments = groupByMonth(payments ?? []);
   return (
     <>
       <Head>
@@ -225,10 +325,33 @@ export default function Home() {
           <h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]">
             Hi
           </h1>
+          {firstPayment && (
+            <div>
+              <p>Select year:</p>
+              <select
+                className="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none"
+                onChange={(e) => setYear(parseInt(e.target.value))}
+                value={year}
+              >
+                {
+                  (() => {
+                    const currentYear = new Date().getFullYear();
+                    const firstYear = firstPayment!.date.getFullYear();
+                    const years = [];
+                    for (let i = firstYear; i <= currentYear; i++) {
+                      years.push(<option key={i} value={i}>{i}</option>);
+                    }
+                    return years;
+                  })()
+                }
+              </select>
+
+            </div>)}
+
           <CreatePaymentModal />
           <Accordion className="w-full">
             {Object.entries(groupedPayments).map(([month, payments]) => (
-              <AccordionItem key={month}>
+              <AccordionItem key={month} >
                 <AccordionItemHeading className="bg-white rounded p-3 my-2">
                   <AccordionItemButton>
                     <span>{month}</span>
@@ -237,8 +360,8 @@ export default function Home() {
                     </span>
                   </AccordionItemButton>
                 </AccordionItemHeading>
-                <AccordionItemPanel>
-                  <div className="grid grid-cols-5 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <AccordionItemPanel className="duration-1000 transition-all">
+                  <div className="grid grid-cols-5 md:grid-cols-2 lg:grid-cols-5 gap-4 duration-1000">
                     {(payments as Payment[]).map((payment) => (
                       <ViewPayment key={payment.id} payment={payment} />
                     ))}
