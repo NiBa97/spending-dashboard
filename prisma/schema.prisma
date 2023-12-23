@@ -15,13 +15,26 @@ datasource db {
 }
 
 model Payment {
-    id     Int      @id @default(autoincrement())
-    amount Float
-    date   DateTime
-    name   String
-    imgurl String?
-    userId String
-    user   User     @relation(fields: [userId], references: [id])
+    id                String           @id @default(cuid())
+    amount            Float
+    date              DateTime
+    name              String
+    userId            String
+    user              User             @relation(fields: [userId], references: [id])
+    PaymentSchedule   PaymentSchedule? @relation(fields: [paymentScheduleId], references: [id])
+    paymentScheduleId String?
+}
+
+model PaymentSchedule {
+    id             String    @id @default(cuid())
+    userId         String
+    user           User      @relation(fields: [userId], references: [id])
+    linkedPayments Payment[]
+    amount         Float
+    name           String
+    startDate      DateTime
+    lastRun        DateTime?
+    schedule       String
 }
 
 // Necessary for Next auth
@@ -52,14 +65,15 @@ model Session {
 }
 
 model User {
-    id            String    @id @default(cuid())
-    name          String?
-    email         String?   @unique
-    emailVerified DateTime?
-    image         String?
-    accounts      Account[]
-    sessions      Session[]
-    Payment       Payment[]
+    id              String            @id @default(cuid())
+    name            String?
+    email           String?           @unique
+    emailVerified   DateTime?
+    image           String?
+    accounts        Account[]
+    sessions        Session[]
+    Payment         Payment[]
+    PaymentSchedule PaymentSchedule[]
 }
 
 model VerificationToken {

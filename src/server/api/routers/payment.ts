@@ -10,18 +10,20 @@ import {
 
 export const paymentRouter = createTRPCRouter({
   create: protectedProcedure
-    .input(z.object({ name: z.string().min(1), amount: z.number(), date: z.date(), isRecurring: z.boolean() }))
+    .input(z.object({
+      name: z.string().min(1), amount: z.number(), date: z.date(),
+      paymentScheduleId: z.string().optional()
+    }))
     .mutation(async ({ ctx, input }) => {
       // simulate a slow db call
       //await new Promise((resolve) => setTimeout(resolve, 1000));
-      console.log(ctx.session.user.id)
       return ctx.db.payment.create({
         data: {
           name: input.name,
           amount: input.amount,
           date: input.date,
           userId: ctx.session.user.id,
-          isRecurring: input.isRecurring
+          paymentScheduleId: input.paymentScheduleId
         },
       });
     }),
@@ -32,7 +34,7 @@ export const paymentRouter = createTRPCRouter({
       },
     });
   }),
-  update: protectedProcedure.input(z.object({ id: z.string(), name: z.string().min(1), amount: z.number(), date: z.date(), imgurl: z.string() })).mutation(async ({ ctx, input }) => {
+  update: protectedProcedure.input(z.object({ id: z.string(), name: z.string().min(1), amount: z.number(), date: z.date() })).mutation(async ({ ctx, input }) => {
     return ctx.db.payment.update({
       where: {
         id: input.id,
