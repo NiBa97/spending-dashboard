@@ -1,8 +1,8 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useMemo } from "react";
 import Papa from "papaparse";
 import { useRouter } from "next/router";
 import { useDropzone } from "react-dropzone";
-
+import { useTable, useSortBy, useRowSelect } from "react-table";
 interface Transaction {
   Date: string;
   Name: string;
@@ -80,7 +80,40 @@ const CategoryMappingComponent = ({ data }: { data: Transaction[] }) => {
       }
     }
   };
+  const columns = useMemo(
+    () => [
+      {
+        Header: "Date",
+        accessor: "Date", // accessor is the "key" in the data
+      },
+      {
+        Header: "Name",
+        accessor: "Name",
+      },
+      {
+        Header: "Usage",
+        accessor: "Usage",
+      },
+      {
+        Header: "Amount",
+        accessor: "Amount",
+      },
+      {
+        Header: "Category",
+        accessor: "Category",
+      },
+    ],
+    [],
+  );
 
+  const {
+    getTableProps,
+    getTableBodyProps,
+    headerGroups,
+    rows,
+    prepareRow,
+    selectedFlatRows,
+  } = useTable({ columns, data }, useSortBy, useRowSelect);
   return (
     <div className="text-white">
       <h1>Group: {currentGroup}</h1>
@@ -133,6 +166,41 @@ const CategoryMappingComponent = ({ data }: { data: Transaction[] }) => {
       <button className="bg-green-500 p-4" onClick={handleNextGroup}>
         Next group
       </button>
+      <table {...getTableProps()}>
+        <thead>
+          {headerGroups.map((headerGroup) => (
+            <tr {...headerGroup.getHeaderGroupProps()}>
+              {headerGroup.headers.map((column) => (
+                <th {...column.getHeaderProps(column.getSortByToggleProps())}>
+                  {column.render("Header")}
+                  <span>
+                    {column.isSorted
+                      ? column.isSortedDesc
+                        ? " 🔽"
+                        : " 🔼"
+                      : ""}
+                  </span>
+                </th>
+              ))}
+            </tr>
+          ))}
+        </thead>
+        <tbody {...getTableBodyProps()}>
+          {rows.map((row, i) => {
+            prepareRow(row);
+            return (
+              <tr {...row.getRowProps()}>
+                {row.cells.map((cell) => {
+                  return (
+                    <td {...cell.getCellProps()}>{cell.render("Cell")}</td>
+                  );
+                })}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      <p>Selected Rows: {selectedFlatRows.length}</p>
     </div>
   );
 };
@@ -180,7 +248,12 @@ const MapColumnsComponent = ({
 }) => {
   const [selectedColumns, setSelectedColumns] = useState<{
     [key: string]: string;
-  }>({});
+  }>({
+    Date: "Buchung",
+    Name: "Auftraggeber/Empf�nger",
+    Usage: "Verwendungszweck",
+    Amount: "Betrag",
+  });
   const columns = Object.keys(data[0]!);
   const handleDropdownChange = (
     event: React.ChangeEvent<HTMLSelectElement>,
@@ -188,27 +261,34 @@ const MapColumnsComponent = ({
     const { value, name } = event.target;
     setSelectedColumns((prev) => ({ ...prev, [name]: value }));
   };
+
   const handleSubmit = () => {
-    const mappedData: Transaction[] = data.map((row) => {
-      if (
-        !selectedColumns["Date"] ||
-        !selectedColumns["Name"] ||
-        !selectedColumns["Usage"] ||
-        !row[selectedColumns["Amount"]!]
-      ) {
-        return;
-      }
-      console.log(row);
-      const newRow: Transaction = {
-        Date: row[selectedColumns["Date"]!]!,
-        Name: row[selectedColumns["Name"]!]!,
-        Usage: row[selectedColumns["Usage"]!]!,
-        Amount: parseFloat(
-          row[selectedColumns["Amount"]!]!.replace(".", "").replace(",", "."),
-        ),
-      };
-      return newRow;
-    });
+    const mappedData: Transaction[] = data
+      .map((row) => {
+        if (
+          !selectedColumns["Date"] ||
+          !selectedColumns["Name"] ||
+          !selectedColumns["Usage"] ||
+          !row[selectedColumns["Amount"]!]
+        ) {
+          return null;
+        } else {
+          console.log(row);
+          const newRow: Transaction = {
+            Date: row[selectedColumns["Date"]!]!,
+            Name: row[selectedColumns["Name"]!]!,
+            Usage: row[selectedColumns["Usage"]!]!,
+            Amount: parseFloat(
+              row[selectedColumns["Amount"]!]!.replace(".", "").replace(
+                ",",
+                ".",
+              ),
+            ),
+          };
+          return newRow;
+        }
+      })
+      .filter((item): item is Transaction => item !== null);
     onSubmit(mappedData);
   };
   return (
@@ -252,6 +332,92 @@ const MapColumnsComponent = ({
   );
 };
 
+const FilterComponent = ({
+  data,
+  onSubmit,
+}: {
+  data: Transaction[];
+  onSubmit: (data: Transaction[]) => void;
+}) => {
+  const [maxAmount, setMaxAmount] = useState<number>(5);
+  const [maxOccurrence, setMaxOccurrence] = useState<number>(5);
+  const [filteredData, setFilteredData] = useState<Transaction[]>([]);
+  useEffect(() => {
+    const occurrence: { [key: string]: number } = {};
+
+    data.forEach((transaction) => {
+      if (Math.abs(transaction.Amount) <= maxAmount) {
+        occurrence[transaction.Name] = (occurrence[transaction.Name] || 0) + 1;
+      }
+    });
+
+    setFilteredData(
+      data.filter(
+        (transaction) =>
+          Math.abs(transaction.Amount) <= maxAmount &&
+          (occurrence[transaction.Name] || 0) <= maxOccurrence,
+      ),
+    );
+
+    console.log(filteredData);
+  }, [maxAmount, maxOccurrence, data]);
+
+  const submit = () => {
+    //return the data without the filtered data
+
+    const returnData = data.filter(
+      (transaction) => !filteredData.includes(transaction),
+    );
+
+    onSubmit(returnData);
+  };
+  return (
+    <div>
+      <h2>Filter</h2>
+      <div>
+        <label>
+          Minimal Amount:
+          <input
+            type="number"
+            className="text-black"
+            value={maxAmount}
+            onChange={(e) => setMaxAmount(Number(e.target.value))}
+          />
+        </label>
+      </div>
+      <div>
+        <label>
+          Maximal Occurrence:
+          <input
+            type="number"
+            className="text-black"
+            value={maxOccurrence}
+            onChange={(e) => setMaxOccurrence(Number(e.target.value))}
+          />
+        </label>
+      </div>
+      <table>
+        <tbody>
+          <tr>
+            {Object.values(target_columns).map((column, index) => (
+              <td key={index}>{column}</td>
+            ))}
+          </tr>
+
+          {filteredData.map((row, index) => (
+            <tr key={index}>
+              {Object.values(target_columns).map((column, i) => (
+                <td key={i}>{row[column]}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <button onClick={submit}>Apply Filter</button>
+    </div>
+  );
+};
+
 export default function Page() {
   const [columns, setColumns] = useState<Array<string>>([]);
 
@@ -266,19 +432,25 @@ export default function Page() {
       complete: function (results: Papa.ParseResult<any>) {
         setColumns(results.meta.fields); // get the column names
         setData(results.data); // get the first 5 rows
+        console.log("step0");
+        console.log(results.data);
         setCurrentStep(1);
       },
     });
   };
 
-  //localStorage.setItem("mappedData", JSON.stringify(mappedData)); // save the mapped data in local storage
-
   const onSubmit = (data: Transaction[]) => {
+    console.log("step2");
     console.log(data);
     setParsedData(data);
     setCurrentStep(2);
   };
 
+  const onFilterSubmit = (data: Transaction[]) => {
+    localStorage.setItem("data", JSON.stringify(data)); // save the mapped data in local storage
+    setParsedData(data);
+    setCurrentStep(3);
+  };
   return (
     <div className="text-white">
       <h1 className="color-white">CSV</h1>
@@ -286,7 +458,13 @@ export default function Page() {
       {currentStep === 1 && (
         <MapColumnsComponent data={data!} onSubmit={onSubmit} />
       )}
-      {currentStep === 2 && <CategoryMappingComponent data={parsedData} />}
+      {
+        currentStep === 2 && (
+          <FilterComponent data={parsedData} onSubmit={onFilterSubmit} />
+        )
+        //
+      }
+      {currentStep === 3 && <CategoryMappingComponent data={parsedData} />}
     </div>
   );
 }
