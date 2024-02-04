@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import _ from "lodash";
 import { RouterOutputs, api } from "~/utils/api";
 import crypto from "crypto";
@@ -75,39 +75,92 @@ const updateTransactions = (transactions: Transaction[], mutate) => {
   });
 };
 
+const createCategoryMappingRule = (name: string, category: string, mutate) => {
+  // Hash the name
+  const hash = crypto.createHash("sha256").update(name).digest("hex");
+  console.log("hash", hash);
+  console.log("category", category);
+  // Create the mapping rule
+  mutate({
+    hash: hash,
+    category: category,
+  });
+};
+
+function check_existing_mappings(data: any, all_mappings: any) {
+  //check if all mappings data is available
+  if (!all_mappings) {
+    console.log("no mappings data");
+    return data;
+  }
+  //iterate through each transaction in the current group
+  //check if its hash value as an assigned category, if so, set it
+  data.forEach((transaction: Transaction) => {
+    const hash = crypto
+      .createHash("sha256")
+      .update(
+        JSON.stringify({
+          name: transaction.Name,
+          usage: transaction.Usage,
+          amount: transaction.Amount,
+          date: transaction.Date,
+        }),
+      )
+      .digest("hex");
+    const mapping = all_mappings.find((mapping) => mapping.hash === hash);
+
+    if (mapping) {
+      transaction.Category = mapping.category;
+    }
+  });
+  return data;
+}
+
 export default function CategoryMappingComponent() {
   const static_columns = ["Date", "Name", "Usage", "Amount"];
   const static_categories = ["Food", "Transport", "Entertainment", "Other"];
   const [selectedCategory, setSelectedCategory] = useState("");
 
+  const { data: all_mappings } =
+    api.transactionCategoryMapping.getAll.useQuery();
   const [groupedData, setGroupedData] = useState({});
   const [currentGroup, setCurrentGroup] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [lastClickedRow, setLastClickedRow] = useState(null);
+
+  const [selectedRows, setSelectedRows] = useState([]);
+  const groupNames = useMemo(() => Object.keys(groupedData), [groupedData]);
+
+  const [createMappingRule, setCreateMappingRule] = useState(false);
+
+  const [highlightUnassigned, setHighlightUnassigned] = useState(false);
+
+  const { mutate, _mutatePost, mutateLoad } =
+    api.transactionCategoryMapping.upsert.useMutation();
+
+  const test = api.categoryMappingRule.upsert.useMutation();
   useEffect(() => {
     // Perform localStorage action
     let transactions_from_local_storage = JSON.parse(
       localStorage.getItem("data")!,
     );
 
+    // Check existing mappings and apply them
     transactions_from_local_storage = check_existing_mappings(
       transactions_from_local_storage,
+      all_mappings,
     );
-    console.log(
-      "transactions_from_local_storage",
-      transactions_from_local_storage,
-    );
+
+    // Group and sort transactions
     const data = groupAndSortTransactions(transactions_from_local_storage, 3);
-    console.log("data", data);
 
+    // Set grouped data
     setGroupedData(data);
-  }, []);
 
-  useEffect(() => {
-    //get the first name of the group
-    const groupNames = Object.keys(groupedData);
+    // Set current group to the first one
+    const groupNames = Object.keys(data);
     setCurrentGroup(groupNames[0]);
-  }, [groupedData]);
+  }, [all_mappings]);
 
   const handleSingleAssignCategory = (category, index = null) => {
     console.log("category", category);
@@ -121,14 +174,20 @@ export default function CategoryMappingComponent() {
     }
   };
 
-  const handleMultipleAssignCategory = (category) => {
+  const handleMultipleAssignCategory = (category: string) => {
     let updatedGroup = [];
+    //check if currentGroup is empty
+    console.log("currentGroup", currentGroup);
+
     //check if there are any selected rows
     if (selectedRows.length === 0) {
       //if no rows are selected, assign category to all transactions in the current group
       updatedGroup = groupedData[currentGroup].map((transaction) => {
         return { ...transaction, Category: category };
       });
+      if (createMappingRule) {
+        createCategoryMappingRule(currentGroup, category, test.mutate);
+      }
     } else {
       //if rows are selected, assign category to all selected transactions
       updatedGroup = groupedData[currentGroup].map((transaction) => {
@@ -139,43 +198,7 @@ export default function CategoryMappingComponent() {
       });
     }
     setGroupedData((prev) => ({ ...prev, [currentGroup]: updatedGroup }));
-    console.log(updatedGroup);
   };
-
-  const [highlightUnassigned, setHighlightUnassigned] = useState(false);
-
-  const ctx = api.useContext();
-
-  const all_mappings = api.transactionCategoryMapping.getAll.useQuery();
-  function check_existing_mappings(data: any) {
-    //iterate through each transaction in the current group
-    //check if its hash value as an assigned category, if so, set it
-    data.forEach((transaction) => {
-      const hash = crypto
-        .createHash("sha256")
-        .update(
-          JSON.stringify({
-            name: transaction.Name,
-            usage: transaction.Usage,
-            amount: transaction.Amount,
-            date: transaction.Date,
-          }),
-        )
-        .digest("hex");
-      const mapping = all_mappings.data!.find(
-        (mapping) => mapping.hash === hash,
-      );
-
-      if (mapping) {
-        transaction.Category = mapping.category;
-        console.log("mapping", mapping);
-      }
-    });
-    console.log("data-return", data);
-    return data;
-  }
-  const { mutate, _mutatePost, mutateLoad } =
-    api.transactionCategoryMapping.upsert.useMutation();
 
   const handleNextGroup = () => {
     const groupNames = Object.keys(groupedData);
@@ -197,17 +220,14 @@ export default function CategoryMappingComponent() {
 
         setCurrentGroup(groupNames[currentIndex + 1]);
         setCurrentIndex(currentIndex + 1);
+      } else {
+        console.log("all groups have been processed");
       }
     }
   };
-  const [selectedRows, setSelectedRows] = useState([]);
 
   // Function to handle checkbox change
   const handleCheckboxChange = (event, index) => {
-    console.log("event", event);
-    console.log("index", index);
-    console.log(event.nativeEvent.shiftKey);
-
     if (event.nativeEvent.shiftKey && lastClickedRow !== null) {
       const start = Math.min(lastClickedRow, index);
       const end = Math.max(lastClickedRow, index);
@@ -306,6 +326,13 @@ export default function CategoryMappingComponent() {
           </option>
         ))}
       </select>
+      <input
+        type="checkbox"
+        checked={createMappingRule}
+        onChange={(e) => setCreateMappingRule(e.target.checked)}
+        placeholder="Create mapping rule"
+      />
+      <label htmlFor="create_mapping_rule">Create mapping rule</label>
       <button
         className="mr-4 bg-black p-4"
         onClick={() => handleMultipleAssignCategory(selectedCategory)}

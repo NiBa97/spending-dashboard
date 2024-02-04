@@ -2,7 +2,6 @@ import React, { useState, useCallback, useEffect, useMemo } from "react";
 import Papa from "papaparse";
 import { useRouter } from "next/router";
 import { useDropzone } from "react-dropzone";
-import { useTable, useSortBy, useRowSelect } from "react-table";
 interface Transaction {
   Date: string;
   Name: string;
@@ -106,14 +105,6 @@ const CategoryMappingComponent = ({ data }: { data: Transaction[] }) => {
     [],
   );
 
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    rows,
-    prepareRow,
-    selectedFlatRows,
-  } = useTable({ columns, data }, useSortBy, useRowSelect);
   return (
     <div className="text-white">
       <h1>Group: {currentGroup}</h1>
@@ -166,41 +157,6 @@ const CategoryMappingComponent = ({ data }: { data: Transaction[] }) => {
       <button className="bg-green-500 p-4" onClick={handleNextGroup}>
         Next group
       </button>
-      <table {...getTableProps()}>
-        <thead>
-          {headerGroups.map((headerGroup) => (
-            <tr {...headerGroup.getHeaderGroupProps()}>
-              {headerGroup.headers.map((column) => (
-                <th {...column.getHeaderProps(column.getSortByToggleProps())}>
-                  {column.render("Header")}
-                  <span>
-                    {column.isSorted
-                      ? column.isSortedDesc
-                        ? " 🔽"
-                        : " 🔼"
-                      : ""}
-                  </span>
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody {...getTableBodyProps()}>
-          {rows.map((row, i) => {
-            prepareRow(row);
-            return (
-              <tr {...row.getRowProps()}>
-                {row.cells.map((cell) => {
-                  return (
-                    <td {...cell.getCellProps()}>{cell.render("Cell")}</td>
-                  );
-                })}
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-      <p>Selected Rows: {selectedFlatRows.length}</p>
     </div>
   );
 };

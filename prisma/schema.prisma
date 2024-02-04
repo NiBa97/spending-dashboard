@@ -19,6 +19,14 @@ model TransactionCategoryMapping {
     category String
 }
 
+model CategoryMappingRule {
+    id       Int    @id @default(autoincrement())
+    userId   String
+    user     User   @relation(fields: [userId], references: [id])
+    hash     String @unique
+    category String
+}
+
 model Payment {
     id                String           @id @default(cuid())
     amount            Float
@@ -80,6 +88,7 @@ model User {
     Payment                    Payment[]
     PaymentSchedule            PaymentSchedule[]
     TransactionCategoryMapping TransactionCategoryMapping[]
+    CategoryMappingRule        CategoryMappingRule[]
 }
 
 model VerificationToken {
