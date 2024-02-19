@@ -4,17 +4,6 @@ import { RouterOutputs, api } from "~/utils/api";
 import crypto from "crypto";
 import { check } from "prettier";
 
-interface Transaction {
-  Date: string;
-  Name: string;
-  Usage: string;
-  Amount: number;
-  Category?: string;
-}
-
-interface CSVData {
-  [key: string]: string;
-}
 function groupAndSortTransactions(
   transactions: Transaction[],
   minCount: number,
@@ -116,7 +105,7 @@ function check_existing_mappings(data: any, all_mappings: any) {
   return data;
 }
 
-export default function CategoryMappingComponent() {
+export default function TransactionMapper() {
   const static_columns = ["Date", "Name", "Usage", "Amount"];
   const static_categories = ["Food", "Transport", "Entertainment", "Other"];
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -250,9 +239,9 @@ export default function CategoryMappingComponent() {
 
   return (
     <div className="text-white">
-      <h1>Group: {currentGroup}</h1>
+      <h1>Group: {currentGroup} </h1>
       <h2>
-        {currentIndex + 1} /{Object.keys(groupedData).length - 1}
+        {currentIndex + 1} / {Object.keys(groupedData).length - 1}
       </h2>
       <table>
         <thead>
