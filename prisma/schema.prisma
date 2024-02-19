@@ -12,19 +12,30 @@ generator client {
 }
 
 model TransactionCategoryMapping {
-    id       Int    @id @default(autoincrement())
-    userId   String
-    user     User   @relation(fields: [userId], references: [id])
-    hash     String @unique
-    category String
+    id         Int      @id @default(autoincrement())
+    userId     String
+    user       User     @relation(fields: [userId], references: [id])
+    hash       String   @unique
+    category   Category @relation(fields: [categoryId], references: [id])
+    categoryId Int
 }
 
 model CategoryMappingRule {
-    id       Int    @id @default(autoincrement())
-    userId   String
-    user     User   @relation(fields: [userId], references: [id])
-    hash     String @unique
-    category String
+    id         Int      @id @default(autoincrement())
+    userId     String
+    user       User     @relation(fields: [userId], references: [id])
+    hash       String   @unique
+    category   Category @relation(fields: [categoryId], references: [id])
+    categoryId Int
+}
+
+model Category {
+    id                         Int                          @id @default(autoincrement())
+    name                       String
+    userId                     String
+    user                       User                         @relation(fields: [userId], references: [id])
+    CategoryMappingRule        CategoryMappingRule[]
+    TransactionCategoryMapping TransactionCategoryMapping[]
 }
 
 model Payment {
@@ -89,6 +100,7 @@ model User {
     PaymentSchedule            PaymentSchedule[]
     TransactionCategoryMapping TransactionCategoryMapping[]
     CategoryMappingRule        CategoryMappingRule[]
+    Category                   Category[]
 }
 
 model VerificationToken {
