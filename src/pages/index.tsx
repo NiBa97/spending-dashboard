@@ -2,6 +2,7 @@ import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { RouterOutputs, api } from "~/utils/api";
 import { useEffect, useState } from "react";
+import ImportSuite from "./import_suite";
 
 const MetaSidebar = () => {
   const { data: mapped_transaction_count } =
@@ -31,9 +32,9 @@ export default function Home() {
           Import transactions
         </Link>
       </div>
-
+      <ImportSuite />
       <div className="flex">
-        <div className="content bg-background w-3/4"></div>
+        <div className="content w-3/4 bg-background"></div>
         <div className="container  w-1/4 flex-row gap-5 bg-green-500 text-white">
           <MetaSidebar />
         </div>
