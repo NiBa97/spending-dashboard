@@ -6,7 +6,6 @@ export default function UploadComponent({
   onNext: (data: any) => void;
 }) {
   const onDrop = (acceptedFiles: File[]) => {
-    console.log("acceptedFiles", acceptedFiles);
     Papa.parse(acceptedFiles[0], {
       header: true,
       complete: function (results: Papa.ParseResult<any>) {

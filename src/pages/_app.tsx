@@ -35,7 +35,7 @@ const Navbar = () => {
     </div>
   );
 };
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Transaction } from "./import_suite/types";
 
 const MyApp: AppType<{ session: Session | null }> = ({
@@ -43,6 +43,24 @@ const MyApp: AppType<{ session: Session | null }> = ({
   pageProps: { session, ...pageProps },
 }) => {
   const [data, setData] = useState<Transaction[]>([]);
+  // Load data from localStorage when component mounts
+  useEffect(() => {
+    console.log("Loading data from localStorage");
+    const savedData = localStorage.getItem("data");
+    if (savedData && savedData.length > 0) {
+      console.log("Setting data", JSON.parse(savedData));
+      setData(JSON.parse(savedData));
+    }
+  }, []);
+
+  // Save data to localStorage whenever it changes
+  useEffect(() => {
+    if (!data) {
+      return;
+    }
+    console.log("Data changed", data);
+    localStorage.setItem("data", JSON.stringify(data));
+  }, [data]);
   return (
     <SessionProvider session={session}>
       <DataContext.Provider value={{ data, setData }}>
@@ -52,7 +70,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
           <link rel="icon" href="/favicon.ico" />
         </Head>
 
-        <main className="bg-background flex min-h-screen  flex-col items-stretch pt-4">
+        <main className="flex min-h-screen flex-col  items-stretch bg-background pt-4">
           <Navbar />
           <div className="container mx-auto grow bg-red-500">
             <Component {...pageProps} />
