@@ -3,7 +3,7 @@ import { SessionProvider } from "next-auth/react";
 import { type AppType } from "next/app";
 import Head from "next/head";
 import { api } from "~/utils/api";
-import { DataContext } from "./data_context";
+import { DataContext } from "../components/data_context";
 import "~/styles/globals.css";
 import Link from "next/link";
 const Navbar = () => {
@@ -12,31 +12,31 @@ const Navbar = () => {
       <div className="container mx-auto flex items-center justify-between">
         <h1 className="font-bold">T3 App</h1>
         <div className="-mb-px flex space-x-3 overflow-x-auto sm:space-x-0">
-          <a
+          <Link
             className="text-primary whitespace-nowrap border-b border-blue-600 pb-2 pt-1 font-semibold leading-none transition sm:px-2"
             href="/api/auth/signin"
           >
             Dashboard
-          </a>
+          </Link>
           <Link
             className="text-primary whitespace-nowrap border-b border-transparent pb-2 pt-1 leading-none transition hover:border-gray-300 dark:hover:border-gray-600 sm:px-2"
             href="/api/auth/signin"
           >
             Sign out
           </Link>
-          <a
+          <Link
             className="text-primary whitespace-nowrap border-b border-transparent pb-2 pt-1 leading-none transition hover:border-gray-300 dark:hover:border-gray-600 sm:px-2"
             href="/api/auth/signin"
           >
             Sign out
-          </a>
+          </Link>
         </div>
       </div>
     </div>
   );
 };
 import { useEffect, useState } from "react";
-import { Transaction } from "./import_suite/types";
+import { Transaction } from "../components/import_suite/types";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -47,8 +47,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
   useEffect(() => {
     const savedData = localStorage.getItem("data");
     if (savedData && savedData.length > 0) {
-      console.log("Setting data", JSON.parse(savedData));
-      setData(JSON.parse(savedData));
+      setData(JSON.parse(savedData) as Transaction[]);
     }
   }, []);
 
@@ -72,10 +71,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
           <Navbar />
           <div className="container mx-auto grow bg-red-500">
             <Component {...pageProps} />
-            <p>
-              Current Number of imported transactions:{" "}
-              {(data && data.length) || 0}
-            </p>
+            <p>Current Number of imported transactions: {data?.length ?? 0}</p>
           </div>
         </main>
       </DataContext.Provider>

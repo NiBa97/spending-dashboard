@@ -32,10 +32,10 @@ export const paymentScheduleRouter = createTRPCRouter({
     });
 
     if (payments.length > 0) {
-      for (let i = 0; i < payments.length; i++) {
+      for (const payment of payments) {
         await ctx.db.payment.delete({
           where: {
-            id: payments[i]!.id,
+            id: payment.id,
           },
         });
       }

@@ -29,9 +29,11 @@ export function CategoryMapper({
     if (!all_mappings) {
       return;
     }
-    setGroupedTransactions(
-      apply_existing_mappings(grouped_transactions, all_mappings),
+    const updatedGroupedTransactions = apply_existing_mappings(
+      grouped_transactions,
+      all_mappings,
     );
+    setGroupedTransactions(updatedGroupedTransactions);
     setNextGroup();
   }, [all_mappings]);
 
@@ -59,8 +61,7 @@ export function CategoryMapper({
       Object.values(grouped_transactions).forEach((group) => {
         flattenedData = flattenedData.concat(group);
       });
-      console.log("flattened data", flattenedData!);
-      onNext(flattenedData!);
+      onNext(flattenedData);
     } else {
       setCurrentGroup(next_group);
     }
@@ -73,7 +74,7 @@ export function CategoryMapper({
     <div className="text-white">
       <h1>Group: {currentGroup} </h1>
       <h2>
-        {groupNames.indexOf(currentGroup!) + 1} /{" "}
+        {groupNames.indexOf(currentGroup) + 1} /{" "}
         {Object.keys(grouped_transactions).length}
       </h2>
       {grouped_transactions[currentGroup] && (

@@ -1,13 +1,15 @@
-import { Mapping, Transaction } from "./types";
+import type { Mapping, Transaction } from "./types";
 import _ from "lodash";
 import { createHash } from "crypto";
 import { api } from "~/utils/api";
-export function apply_existing_mappings(data: any, all_mappings: Mapping[]) {
+export function apply_existing_mappings(
+  data: Record<string, Transaction[]>,
+  all_mappings: Mapping[],
+) {
   //check if all mappings data is available
   if (data === undefined || all_mappings === undefined) {
     return data;
   }
-  console.log("data", data);
 
   //iterate through each transaction in the current group
   //check if its hash value as an assigned category, if so, set it
@@ -15,7 +17,7 @@ export function apply_existing_mappings(data: any, all_mappings: Mapping[]) {
   //iterate through all groups and each transaction in that group
   //iterate ofver all keys inside the data dict
   Object.keys(data).forEach((key) => {
-    data[key].forEach((transaction: Transaction) => {
+    data[key]!.forEach((transaction: Transaction) => {
       const hash = createHash("sha256")
         .update(
           JSON.stringify({
@@ -38,12 +40,12 @@ export function apply_existing_mappings(data: any, all_mappings: Mapping[]) {
 export function groupAndSortTransactions(
   transactions: Transaction[],
   minCount: number,
-): { [key: string]: Transaction[] } {
+): Record<string, Transaction[]> {
   // Group the transactions by name
   const grouped = _.groupBy(transactions, "Name");
 
   // Filter groups by member count and sort them
-  const filteredGroups: { [key: string]: Transaction[] } = {};
+  const filteredGroups: Record<string, Transaction[]> = {};
   const otherGroup: Transaction[] = [];
 
   Object.entries(grouped).forEach(([key, value]) => {
@@ -63,7 +65,7 @@ export function groupAndSortTransactions(
     sortedGroups.push(["Other", otherGroup]);
   }
   // Convert back to an object
-  const result: { [key: string]: Transaction[] } = {};
+  const result: Record<string, Transaction[]> = {};
   sortedGroups.forEach(([key, value]) => {
     result[key] = value;
   });
@@ -73,7 +75,7 @@ export function groupAndSortTransactions(
 
 export function get_next_group(
   current_group: string,
-  grouped_transactions: { [key: string]: Transaction[] },
+  grouped_transactions: Record<string, Transaction[]>,
 ) {
   if (current_group === null) {
     // get the first group

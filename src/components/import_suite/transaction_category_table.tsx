@@ -37,7 +37,7 @@ export default function TransactionCategoryTable({
     setTransactions(updatedTransactions);
   };
 
-  const handleCheckboxChange = (event: any, index: number) => {
+  const handleCheckboxChange = (event: React.MouseEvent, index: number) => {
     if (event.nativeEvent.shiftKey && lastClickedRow !== undefined) {
       const start = Math.min(lastClickedRow, index);
       const end = Math.max(lastClickedRow, index);
@@ -50,11 +50,15 @@ export default function TransactionCategoryTable({
       if (!selectedRows.includes(transactions[index]!)) {
         setSelectedRows((prev) => [...prev, transactions[index]!]);
       } else {
-        setSelectedRows((prev) =>
-          prev.filter((t) => t !== transactions[index]),
-        );
+        unCheckRow(index);
       }
       setLastClickedRow(index);
+    }
+  };
+
+  const unCheckRow = (index: number) => {
+    if (selectedRows.includes(transactions[index]!)) {
+      setSelectedRows((prev) => prev.filter((t) => t !== transactions[index]));
     }
   };
 
@@ -95,7 +99,7 @@ export default function TransactionCategoryTable({
               <td>
                 <input
                   type="checkbox"
-                  onChange={(event) => handleCheckboxChange(event, index)}
+                  onChange={(event) => unCheckRow(index)}
                   checked={selectedRows.includes(transaction)}
                 />
               </td>
@@ -104,7 +108,7 @@ export default function TransactionCategoryTable({
               ))}
               <td>
                 <select
-                  value={transaction.Category || ""}
+                  value={transaction.Category ?? ""}
                   onChange={(e) => handleAssignCategory(e.target.value, index)}
                   className="text-black"
                 >

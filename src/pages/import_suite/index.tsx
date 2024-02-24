@@ -1,15 +1,18 @@
 import { useContext, useEffect, useState } from "react";
-import UploadComponent from "./uploader";
-import { ColumnMapper } from "./columnmapper";
-import { ImportStatus, Transaction } from "./types";
-import { DataContext } from "../data_context";
-import { CategoryMapper } from "./new_cat_mapper";
+import UploadComponent from "../../components/import_suite/uploader";
+import { ColumnMapper } from "../../components/import_suite/columnmapper";
+import { ImportStatus } from "../../components/import_suite/types";
+import type { Transaction } from "../../components/import_suite/types";
+import { DataContext } from "../../components/data_context";
+import { CategoryMapper } from "../../components/import_suite/new_cat_mapper";
 
 import { useRouter } from "next/router";
 export default function ImportSuite() {
   const [importState, setImportState] = useState(ImportStatus.FILEUPLOAD);
 
-  const [imported_data, setImportedData] = useState<any>({});
+  const [imported_data, setImportedData] = useState<Record<string, string>[]>(
+    [],
+  );
   const [columnised_data, setColumnisedData] = useState<Transaction[]>([]);
   const [mapped_data, setMappedData] = useState<Transaction[]>([]);
 
@@ -22,8 +25,17 @@ export default function ImportSuite() {
       if (typeof transactions !== "string") {
         return;
       }
-      setImportedData(JSON.parse(transactions));
-      setImportState(ImportStatus.COLUMNMAPPING);
+      const parsed_transactions = JSON.parse(transactions) as Record<
+        string,
+        string
+      >[];
+      if (
+        Array.isArray(parsed_transactions) &&
+        parsed_transactions.every((item) => typeof item === "object")
+      ) {
+        setImportedData(parsed_transactions);
+        setImportState(ImportStatus.COLUMNMAPPING);
+      }
     }
   }, [transactions]);
   // get the DataContext from the app
@@ -33,8 +45,8 @@ export default function ImportSuite() {
     case ImportStatus.FILEUPLOAD:
       return (
         <UploadComponent
-          onNext={(raw_data: File[]) => {
-            router.push(
+          onNext={(raw_data: object) => {
+            void router.push(
               {
                 pathname: "/import_suite",
                 query: { transactions: JSON.stringify(raw_data) },
@@ -76,7 +88,7 @@ export default function ImportSuite() {
         setData([...data, ...mapped_data]);
       }
       //setting data
-      router.push("/");
+      void router.push("/");
       //reset all the states
       setImportedData([]);
       setColumnisedData([]);

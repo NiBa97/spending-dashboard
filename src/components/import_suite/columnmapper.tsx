@@ -1,45 +1,19 @@
 import { useState } from "react";
-import { Transaction } from "./types";
+import type { Transaction } from "./types";
 const target_columns = ["Date", "Name", "Usage", "Amount"];
-export function MultipleColumnMapper({
-  data,
-  onNext,
-  onBack,
-}: {
-  data: File[];
-  onNext: (data: Transaction[]) => void;
-  onBack: () => void;
-}) {
-  if (data[0] === undefined) {
-    alert("No file uploaded");
-    onBack();
-  }
-  const [selectedFile, setSelectedFile] = useState<File>(data[0]);
-  let global_mapped_data: Transaction[] = [];
-  function process_next_file(mapped_data: Transaction[]) {
-    global_mapped_data = global_mapped_data.concat(mapped_data);
 
-    let new_index = data.indexOf(selectedFile) + 1;
-    if (new_index === data.length) {
-      onNext(global_mapped_data);
-    } else {
-      setSelectedFile(data[new_index]!);
-    }
-  }
-  return <ColumnMapper data={selectedFile} onSubmit={process_next_file} />;
-}
 export function ColumnMapper({
   data,
   onNext,
   onBack,
 }: {
-  data: {};
+  data: Record<string, string>[];
   onNext: (data: Transaction[]) => void;
   onBack: () => void;
 }) {
-  const [selectedColumns, setSelectedColumns] = useState<{
-    [key: string]: string;
-  }>({
+  const [selectedColumns, setSelectedColumns] = useState<
+    Record<string, string>
+  >({
     Date: "Buchung",
     Name: "Auftraggeber/Empf�nger",
     Usage: "Verwendungszweck",
@@ -61,22 +35,19 @@ export function ColumnMapper({
     const mappedData: Transaction[] = data
       .map((row) => {
         if (
-          !selectedColumns["Date"] ||
-          !selectedColumns["Name"] ||
-          !selectedColumns["Usage"] ||
-          !row[selectedColumns["Amount"]!]
+          !selectedColumns.Date ||
+          !selectedColumns.Name ||
+          !selectedColumns.Usage ||
+          !row[selectedColumns.Amount!]
         ) {
           return null;
         } else {
           const newRow: Transaction = {
-            Date: row[selectedColumns["Date"]!]!,
-            Name: row[selectedColumns["Name"]!]!,
-            Usage: row[selectedColumns["Usage"]!]!,
+            Date: row[selectedColumns.Date]!,
+            Name: row[selectedColumns.Name]!,
+            Usage: row[selectedColumns.Usage]!,
             Amount: parseFloat(
-              row[selectedColumns["Amount"]!]!.replace(".", "").replace(
-                ",",
-                ".",
-              ),
+              row[selectedColumns.Amount!]!.replace(".", "").replace(",", "."),
             ),
           };
           return newRow;
