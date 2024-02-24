@@ -42,10 +42,9 @@ const MyApp: AppType<{ session: Session | null }> = ({
   Component,
   pageProps: { session, ...pageProps },
 }) => {
-  const [data, setData] = useState<Transaction[]>([]);
+  const [data, setData] = useState<Transaction[] | undefined>(undefined);
   // Load data from localStorage when component mounts
   useEffect(() => {
-    console.log("Loading data from localStorage");
     const savedData = localStorage.getItem("data");
     if (savedData && savedData.length > 0) {
       console.log("Setting data", JSON.parse(savedData));
@@ -55,10 +54,9 @@ const MyApp: AppType<{ session: Session | null }> = ({
 
   // Save data to localStorage whenever it changes
   useEffect(() => {
-    if (!data) {
+    if (data === undefined) {
       return;
     }
-    console.log("Data changed", data);
     localStorage.setItem("data", JSON.stringify(data));
   }, [data]);
   return (
@@ -74,7 +72,10 @@ const MyApp: AppType<{ session: Session | null }> = ({
           <Navbar />
           <div className="container mx-auto grow bg-red-500">
             <Component {...pageProps} />
-            <p>Current Number of imported transactions: {data.length}</p>
+            <p>
+              Current Number of imported transactions:{" "}
+              {(data && data.length) || 0}
+            </p>
           </div>
         </main>
       </DataContext.Provider>

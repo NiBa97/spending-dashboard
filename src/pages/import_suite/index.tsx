@@ -70,9 +70,12 @@ export default function ImportSuite() {
       );
     case ImportStatus.COMPLETE:
       //append the new data to the existing data
-      setData([...data, ...mapped_data]);
+      if (data === undefined) {
+        setData(mapped_data);
+      } else {
+        setData([...data, ...mapped_data]);
+      }
       //setting data
-      console.log("data", data);
       router.push("/");
       //reset all the states
       setImportedData([]);
