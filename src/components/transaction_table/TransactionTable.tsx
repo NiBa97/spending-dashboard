@@ -1,12 +1,4 @@
-import {
-  JSXElementConstructor,
-  PromiseLikeOfReactNode,
-  ReactElement,
-  ReactNode,
-  ReactPortal,
-  useContext,
-  useState,
-} from "react";
+import { useContext, useState } from "react";
 import type { Transaction } from "../import_suite/types";
 import {
   Box,
@@ -33,6 +25,7 @@ import Filters from "./Filters";
 import { DataContext } from "../data_context";
 import { FaSort } from "react-icons/fa";
 import React from "react";
+import type { IconType } from "react-icons";
 const columnHelper = createColumnHelper<Transaction>();
 const columns = [
   columnHelper.accessor("Name", {
@@ -57,6 +50,7 @@ const columns = [
     // },
 
     filterFn: (row, columnIds, filterValue) => {
+      if (!Array.isArray(filterValue)) return true;
       if (filterValue.length === 0) return true;
       return filterValue.includes(row.getValue("Category"));
     },
@@ -68,7 +62,7 @@ const columns = [
 ];
 interface Filter {
   id: string;
-  value: string[] | string;
+  value: string[];
 }
 const TransanctionTable = () => {
   const { data, setData } = useContext(DataContext);
@@ -94,7 +88,7 @@ const TransanctionTable = () => {
       updateData: (
         rowIndex: number,
         columnId: keyof Transaction,
-        value: any,
+        value: string,
       ) => {
         alert("updateData not implemented");
         setData((prev: Transaction[] | undefined) =>
@@ -137,7 +131,7 @@ const TransanctionTable = () => {
                 )}
                 {header.column.getCanSort() && (
                   <Icon
-                    as={FaSort}
+                    as={FaSort as IconType}
                     mx={3}
                     fontSize={14}
                     onClick={header.column.getToggleSortingHandler()}
@@ -188,7 +182,7 @@ const TransanctionTable = () => {
         </Button>
       </ButtonGroup>
       <Text mb={2}>
-        Current rows: {table.getFilteredRowModel().rows.length}
+        Current rows: {table.getFilteredRowModel().rows?.length ?? 0}
       </Text>
       <Text mb={2}>
         Rows per page:

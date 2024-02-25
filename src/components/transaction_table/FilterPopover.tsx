@@ -12,6 +12,8 @@ import {
   Flex,
 } from "@chakra-ui/react";
 import { CiFilter } from "react-icons/ci";
+import { IconType } from "react-icons";
+
 import { ColorIcon } from "./CategoryCell";
 const static_categories = ["Food", "Transport", "Entertainment", "Other"];
 
@@ -82,7 +84,8 @@ const FilterPopover = ({
   setColumnFilters,
 }: FilterPopoverProps) => {
   const filterStatuses =
-    columnFilters.find((f) => f.id === "Category")?.value || [];
+    columnFilters.find((f) => f.id === "Category")?.value ?? [];
+
   console.log("filterStatuses", filterStatuses);
   return (
     <Popover isLazy>
@@ -90,7 +93,7 @@ const FilterPopover = ({
         <Button
           size="sm"
           color={filterStatuses.length > 0 ? "blue.300" : ""}
-          leftIcon={<Icon as={CiFilter} fontSize={18} />}
+          leftIcon={<Icon as={CiFilter as IconType} fontSize={18} />}
         >
           Filter {filterStatuses.length > 0 ? `(${filterStatuses.length})` : ""}
         </Button>

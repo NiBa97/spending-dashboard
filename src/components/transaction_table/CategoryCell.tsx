@@ -2,7 +2,7 @@ import { Box, Menu, MenuButton, MenuItem, MenuList } from "@chakra-ui/react";
 const static_categories = ["Food", "Transport", "Entertainment", "Other"];
 interface ColorIconProps {
   color: string;
-  [key: string]: any;
+  [key: string]: string | number | boolean | undefined;
 }
 
 export const ColorIcon = ({ color, ...props }: ColorIconProps) => (
@@ -22,7 +22,7 @@ interface CategoryCellProps {
   column: { id: string };
   table: {
     options: {
-      meta: { updateData: (index: number, id: string, value: any) => void };
+      meta: { updateData: (index: number, id: string, value: string) => void };
     };
   };
 }
@@ -42,7 +42,7 @@ const CateogryCell = ({ getValue, row, column, table }: CategoryCellProps) => {
         {name}
       </MenuButton>
       <MenuList>
-        <MenuItem onClick={() => updateData(row.index, column.id, null)}>
+        <MenuItem onClick={() => updateData(row.index, column.id, "")}>
           <ColorIcon color="red.400" mr={3} />
           None
         </MenuItem>
