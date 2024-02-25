@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type { Transaction, Mapping } from "./types";
+import type { Transaction } from "./types";
 import { api } from "~/utils/api";
 
 import {
@@ -10,7 +10,7 @@ import {
 import TransactionCategoryTable from "./transaction_category_table";
 export function CategoryMapper({
   data,
-  onNext,
+  onNext, // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onBack,
 }: {
   data: Transaction[];

@@ -11,6 +11,7 @@ interface Filter {
   id: string;
   value: string[];
 }
+import { IconType } from "react-icons";
 
 interface FilterProps {
   columnFilters: Filter[];
@@ -28,7 +29,7 @@ const Filters = ({
     <HStack mb={6} spacing={3}>
       <InputGroup size="sm" maxW="12rem">
         <InputLeftElement pointerEvents="none">
-          <Icon as={CiSearch} />
+          <Icon as={CiSearch as IconType} />
         </InputLeftElement>
         <Input
           type="text"

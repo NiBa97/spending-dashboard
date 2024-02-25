@@ -5,7 +5,6 @@ import { DataContext } from "../../components/data_context";
 import TransactionTable from "../../components/transaction_table/TransactionTable";
 
 const TransactionTablePage = () => {
-  const { data } = useContext(DataContext);
   return (
     <div>
       <TransactionTable />
