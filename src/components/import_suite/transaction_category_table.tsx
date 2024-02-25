@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Transaction } from "./types";
 
 const static_columns = ["Date", "Name", "Usage", "Amount"];
-const static_categories = ["Food", "Transport", "Entertainment", "Other"];
 
+const static_categories = ["Food", "Transport", "Entertainment", "Other"];
 export default function TransactionCategoryTable({
   input_transactions,
   onNext,
