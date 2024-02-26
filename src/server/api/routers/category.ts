@@ -1,64 +1,101 @@
 import { z } from "zod";
+import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
-import {
-  createTRPCRouter,
-  protectedProcedure,
-} from "~/server/api/trpc";
-
-
-
-export const categoryMappingRuleRouter = createTRPCRouter({
+export const categoryRouter = createTRPCRouter({
   create: protectedProcedure
     .input(z.object({
-      hash: z.string().min(1), category: z.string().min(1),
+      name: z.string().min(1),
+      color: z.string().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      // simulate a slow db call
-      //await new Promise((resolve) => setTimeout(resolve, 1000));
-      return ctx.db.categoryMappingRule.create({
+      return ctx.db.category.create({
         data: {
-          hash: input.hash,
-          category: input.category,
-          userId: ctx.session.user.id,
+          name: input.name,
+          color: input.color,
+          userId: ctx.session.user.id 
+        },
+        select: {
+          id: true,
+          name: true,
+          color: true,
         },
       });
     }),
-  delete: protectedProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
-    return ctx.db.categoryMappingRule.delete({
+  delete: protectedProcedure.input(z.number()).mutation(async ({ ctx, input }) => {
+    return ctx.db.category.delete({
       where: {
-        hash: input,
+        id: input,
       },
     });
   }),
-  update: protectedProcedure.input(z.object({ hash: z.string(), category: z.string().min(1) })).mutation(async ({ ctx, input }) => {
-    return ctx.db.categoryMappingRule.update({
+  get: protectedProcedure.input(z.number()).query(async ({ ctx, input }) => {
+    return ctx.db.category.findUnique({
       where: {
-        hash : input.hash,
+        id: input,
+      },
+      select: {
+        id: true,
+        name: true,
+        color: true,
+      },
+    });
+  }),
+  update: protectedProcedure.input(z.object({ id: z.number(), name: z.string(), color: z.string().optional() })).mutation(async ({ ctx, input }) => {
+    return ctx.db.category.update({
+      where: {
+        id: input.id,
       },
       data: {
-        category: input.category,
+        name: input.name,
+        color: input.color,
+      },
+      select: {
+        id: true,
+        name: true,
+        color: true,
       },
     });
   }),
   getAll: protectedProcedure.query(({ ctx }) => {
-    return ctx.db.categoryMappingRule.findMany({
+    return ctx.db.category.findMany({
       where: { userId: ctx.session.user.id },
+      select: {
+        id: true,
+        name: true,
+        color: true,
+      },
       take: 1000
     });
   }),
-
-  upsert: protectedProcedure.input(z.object({ hash: z.string().min(1), category: z.string().min(1), })).mutation(async ({ ctx, input }) => {
-    return ctx.db.categoryMappingRule.upsert({
+  upsert: protectedProcedure.input(z.object({ id: z.number().optional(), name: z.string().min(1), color: z.string().optional(), userId: z.string() })).mutation(async ({ ctx, input }) => {
+    return ctx.db.category.upsert({
       where: {
-        hash: input.hash,
+        id: input.id || -1,
       },
       update: {
-        category: input.category,
+        name: input.name,
+        color: input.color,
+        userId: input.userId,
       },
       create: {
-        hash: input.hash,
-        category: input.category,
-        userId: ctx.session.user.id,
+        name: input.name,
+        color: input.color,
+        userId: input.userId,
+      },
+      select: {
+        id: true,
+        name: true,
+        color: true,
+      },
+    });
+  }),
+  getAllCount: protectedProcedure.query(({ ctx }) => {
+    return ctx.db.category.count({
+      where: { userId: ctx.session.user.id },
+      select: {
+        id: true,
+        name: true,
+        color: true,
       },
     });
   }),

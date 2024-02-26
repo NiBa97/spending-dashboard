@@ -1,4 +1,5 @@
 import { Box, Menu, MenuButton, MenuItem, MenuList } from "@chakra-ui/react";
+import CategorySelector from "../categorySelector";
 const static_categories = ["Food", "Transport", "Entertainment", "Other"];
 interface ColorIconProps {
   color: string;
@@ -29,34 +30,6 @@ interface CategoryCellProps {
 const CateogryCell = ({ getValue, row, column, table }: CategoryCellProps) => {
   const { name, color } = getValue() || {};
   const { updateData } = table.options.meta;
-  return (
-    <Menu isLazy offset={[0, 0]} flip={false} autoSelect={false}>
-      <MenuButton
-        h="100%"
-        w="100%"
-        textAlign="left"
-        p={1.5}
-        bg={color || "transparent"}
-        color="gray.900"
-      >
-        {name}
-      </MenuButton>
-      <MenuList>
-        <MenuItem onClick={() => updateData(row.index, column.id, "")}>
-          <ColorIcon color="red.400" mr={3} />
-          None
-        </MenuItem>
-        {static_categories.map((category) => (
-          <MenuItem
-            onClick={() => updateData(row.index, column.id, category)}
-            key={category}
-          >
-            <ColorIcon color="blue" mr={3} />
-            {category}
-          </MenuItem>
-        ))}
-      </MenuList>
-    </Menu>
-  );
+  return <CategorySelector />;
 };
 export default CateogryCell;

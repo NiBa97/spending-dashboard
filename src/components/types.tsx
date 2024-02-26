@@ -6,12 +6,15 @@ export enum ImportStatus {
 }
 import { RouterOutputs, api } from "~/utils/api";
 
-export type Mapping = RouterOutputs["categoryMappingRule"]["getAll"][number];
+export type Mapping =
+  RouterOutputs["transactionCategoryMapping"]["getAll"][number];
+
+export type Category = RouterOutputs["category"]["getAll"][number];
 
 export interface Transaction {
   Date: string;
   Name: string;
   Usage: string;
   Amount: number;
-  Category?: string;
+  Category: Category | null;
 }

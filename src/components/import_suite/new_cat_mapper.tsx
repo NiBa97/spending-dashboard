@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type { Transaction } from "./types";
+import type { Transaction } from "../types";
 import { api } from "~/utils/api";
 
 import {
@@ -7,7 +7,7 @@ import {
   get_next_group,
   groupAndSortTransactions,
 } from "./transaction_utils";
-import TransactionCategoryTable from "./transaction_category_table";
+import TransactionCategoryTable from "./new_transaction_category_table";
 export function CategoryMapper({
   data,
   onNext, // eslint-disable-next-line @typescript-eslint/no-unused-vars

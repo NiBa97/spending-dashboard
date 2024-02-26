@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Transaction } from "./types";
+import type { Transaction } from "../types";
 const target_columns = ["Date", "Name", "Usage", "Amount"];
 
 export function ColumnMapper({

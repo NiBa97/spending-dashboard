@@ -12,53 +12,19 @@ generator client {
 }
 
 model TransactionCategoryMapping {
-    id         Int      @id @default(autoincrement())
-    userId     String
-    user       User     @relation(fields: [userId], references: [id])
-    hash       String   @unique
-    category   Category @relation(fields: [categoryId], references: [id])
-    categoryId Int
-}
-
-model CategoryMappingRule {
-    id         Int      @id @default(autoincrement())
-    userId     String
-    user       User     @relation(fields: [userId], references: [id])
-    hash       String   @unique
-    category   Category @relation(fields: [categoryId], references: [id])
-    categoryId Int
+    userId String
+    user   User   @relation(fields: [userId], references: [id])
+    hash   String @unique
 }
 
 model Category {
-    id                         Int                          @id @default(autoincrement())
-    name                       String
-    userId                     String
-    user                       User                         @relation(fields: [userId], references: [id])
-    CategoryMappingRule        CategoryMappingRule[]
-    TransactionCategoryMapping TransactionCategoryMapping[]
-}
+    id     Int     @id @default(autoincrement())
+    name   String
+    color  String?
+    userId String
+    user   User    @relation(fields: [userId], references: [id])
 
-model Payment {
-    id                String           @id @default(cuid())
-    amount            Float
-    date              DateTime
-    name              String
-    userId            String
-    user              User             @relation(fields: [userId], references: [id])
-    PaymentSchedule   PaymentSchedule? @relation(fields: [paymentScheduleId], references: [id])
-    paymentScheduleId String?
-}
-
-model PaymentSchedule {
-    id             String    @id @default(cuid())
-    userId         String
-    user           User      @relation(fields: [userId], references: [id])
-    linkedPayments Payment[]
-    amount         Float
-    name           String
-    startDate      DateTime
-    lastRun        DateTime?
-    schedule       String
+    @@unique([userId, name])
 }
 
 // Necessary for Next auth
@@ -96,10 +62,7 @@ model User {
     image                      String?
     accounts                   Account[]
     sessions                   Session[]
-    Payment                    Payment[]
-    PaymentSchedule            PaymentSchedule[]
     TransactionCategoryMapping TransactionCategoryMapping[]
-    CategoryMappingRule        CategoryMappingRule[]
     Category                   Category[]
 }
 

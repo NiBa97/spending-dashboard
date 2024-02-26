@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Transaction } from "./types";
+import { Transaction } from "../types";
 
 const static_columns = ["Date", "Name", "Usage", "Amount"];
 

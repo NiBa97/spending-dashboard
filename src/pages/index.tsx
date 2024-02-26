@@ -3,6 +3,8 @@ import Link from "next/link";
 import { RouterOutputs, api } from "~/utils/api";
 import { useEffect, useState } from "react";
 import ImportSuite from "./import_suite";
+import CategorySelector from "~/components/categorySelector";
+import { Category } from "~/components/types";
 
 const MetaSidebar = () => {
   const { data: mapped_transaction_count } =
@@ -22,6 +24,11 @@ const MetaSidebar = () => {
 
 export default function Home() {
   const ctx = useSession();
+  //get all categories
+  const { data: categories } = api.category.getAll.useQuery();
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
+    null,
+  );
   return (
     <>
       <div className="head-row flex items-center justify-between px-4">
@@ -32,7 +39,14 @@ export default function Home() {
           Import transactions
         </Link>
       </div>
-      <ImportSuite />
+
+      <CategorySelector
+        categories={categories ?? []}
+        selectedCategory={selectedCategory}
+        onChange={(category: Category) => setSelectedCategory(category)}
+      />
+
+      {/* <ImportSuite /> */}
       <div className="flex">
         <div className="content w-3/4 bg-background"></div>
         <div className="container  w-1/4 flex-row gap-5 bg-green-500 text-white">
