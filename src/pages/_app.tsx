@@ -38,7 +38,7 @@ const Navbar = () => {
   );
 };
 import { useEffect, useState } from "react";
-import { Transaction } from "../components/import_suite/types";
+import { Transaction } from "../components/types";
 import { useRouter } from "next/router";
 
 const MyApp: AppType<{ session: Session | null }> = ({
@@ -75,9 +75,6 @@ const MyApp: AppType<{ session: Session | null }> = ({
             <Navbar />
             <div className="container mx-auto grow bg-red-500">
               <Component {...pageProps} />
-              <p>
-                Current Number of imported transactions: {data?.length ?? 0}
-              </p>
             </div>
           </main>
         </DataContext.Provider>

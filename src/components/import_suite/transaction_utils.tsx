@@ -1,4 +1,4 @@
-import type { Mapping, Transaction } from "./types";
+import type { Mapping, Transaction } from "../types";
 import _ from "lodash";
 import { createHash } from "crypto";
 import { api } from "~/utils/api";
@@ -106,7 +106,7 @@ export function updateTransactions(transactions: Transaction[]) {
 
     mutate({
       hash: hash,
-      category: transaction.Category!,
+      categoryID: transaction.CategoryID!,
     });
   });
 }

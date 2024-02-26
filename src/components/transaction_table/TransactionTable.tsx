@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import type { Transaction } from "../import_suite/types";
+import type { Transaction } from "../types";
 import {
   Box,
   Button,
@@ -26,6 +26,7 @@ import { DataContext } from "../data_context";
 import { FaSort } from "react-icons/fa";
 import React from "react";
 import type { IconType } from "react-icons";
+import DeleteCell from "./DeleteCell";
 const columnHelper = createColumnHelper<Transaction>();
 const columns = [
   columnHelper.accessor("Name", {
@@ -59,13 +60,24 @@ const columns = [
     header: "Date",
     cell: (props) => props.getValue(),
   }),
+  columnHelper.display({
+    id: "Delete",
+    cell: (props) => DeleteCell({ row: props.row, table: props.table }),
+  }),
 ];
 interface Filter {
   id: string;
   value: string[];
 }
-const TransanctionTable = () => {
-  const { data, setData } = useContext(DataContext);
+const TransanctionTable = ({
+  data,
+  setData,
+  onSave,
+}: {
+  data: Transaction[] | null;
+  setData: React.Dispatch<React.SetStateAction<Transaction[] | null>>;
+  onSave: () => void;
+}) => {
   const [columnFilters, setColumnFilters] = useState<Filter[]>([]);
 
   const [globalFilter, setGlobalFilter] = useState("");
@@ -90,8 +102,7 @@ const TransanctionTable = () => {
         columnId: keyof Transaction,
         value: string,
       ) => {
-        alert("updateData not implemented");
-        setData((prev: Transaction[] | undefined) =>
+        setData((prev: Transaction[] | null) =>
           prev
             ? prev.map((row: Transaction, index: number) =>
                 index === rowIndex
@@ -102,6 +113,11 @@ const TransanctionTable = () => {
                   : row,
               )
             : [],
+        );
+      },
+      deleteRow: (rowIndex: number) => {
+        setData((prev: Transaction[] | null) =>
+          prev ? prev.filter((_, index) => index !== rowIndex) : [],
         );
       },
     },
@@ -196,6 +212,7 @@ const TransanctionTable = () => {
           <option value={100}>100</option>
         </Select>
       </Text>
+      <Button onClick={onSave}>Save</Button>
     </Box>
   );
 };

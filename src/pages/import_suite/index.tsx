@@ -1,8 +1,8 @@
 import { useContext, useEffect, useState } from "react";
 import UploadComponent from "../../components/import_suite/uploader";
 import { ColumnMapper } from "../../components/import_suite/columnmapper";
-import { ImportStatus } from "../../components/import_suite/types";
-import type { Transaction } from "../../components/import_suite/types";
+import { ImportStatus } from "../../components/types";
+import type { Transaction } from "../../components/types";
 import { DataContext } from "../../components/data_context";
 import { CategoryMapper } from "../../components/import_suite/new_cat_mapper";
 
