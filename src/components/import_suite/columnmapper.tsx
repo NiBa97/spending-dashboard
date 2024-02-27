@@ -44,11 +44,12 @@ export function ColumnMapper({
         } else {
           const newRow: Transaction = {
             Date: row[selectedColumns.Date]!,
-            Name: row[selectedColumns.Name]!,
+            Name: row[selectedColumns.Name] || "Unkown",
             Usage: row[selectedColumns.Usage]!,
             Amount: parseFloat(
               row[selectedColumns.Amount!]!.replace(".", "").replace(",", "."),
             ),
+            Category: null,
           };
           return newRow;
         }

@@ -25,7 +25,6 @@ const MetaSidebar = () => {
 export default function Home() {
   const ctx = useSession();
   //get all categories
-  const { data: categories } = api.category.getAll.useQuery();
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
     null,
   );
@@ -35,13 +34,12 @@ export default function Home() {
         <h1 className="text-3xl font-extrabold tracking-tight text-white">
           Hi {ctx.data?.user?.name}!
         </h1>
-        <Link className="button" href="/import">
+        <Link className="button" href="/import_suite">
           Import transactions
         </Link>
       </div>
 
       <CategorySelector
-        categories={categories ?? []}
         selectedCategory={selectedCategory}
         onChange={(category: Category) => setSelectedCategory(category)}
       />

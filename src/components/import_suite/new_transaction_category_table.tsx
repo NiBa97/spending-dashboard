@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Category, Transaction } from "../types";
 import TransanctionTable from "../transaction_table/TransactionTable";
 import { api } from "~/utils/api";
@@ -15,6 +15,10 @@ export default function TransactionCategoryTable({
   const [transactions, setTransactions] = useState<Transaction[] | null>(
     input_transactions,
   );
+  useEffect(() => {
+    setTransactions(input_transactions);
+  }, [input_transactions]);
+
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
     null,
   );
@@ -30,7 +34,6 @@ export default function TransactionCategoryTable({
     <div>
       <Box>
         <CategorySelector
-          categories={categories ?? []}
           selectedCategory={selectedCategory}
           onChange={(category: Category) => setSelectedCategory(category)}
         />

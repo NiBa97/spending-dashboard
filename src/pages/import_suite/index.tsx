@@ -82,7 +82,7 @@ export default function ImportSuite() {
       );
     case ImportStatus.COMPLETE:
       //append the new data to the existing data
-      if (data === undefined) {
+      if (data === null) {
         setData(mapped_data);
       } else {
         setData([...data, ...mapped_data]);

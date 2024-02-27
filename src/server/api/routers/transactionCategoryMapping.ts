@@ -10,7 +10,7 @@ import {
 export const transactionCategoryMappingRouter = createTRPCRouter({
   create: protectedProcedure
     .input(z.object({
-      hash: z.string().min(1), categoryID: z.number(),
+      hash: z.string().min(1), categoryID: z.string(),
     }))
     .mutation(async ({ ctx, input }) => {
     
@@ -20,11 +20,11 @@ export const transactionCategoryMappingRouter = createTRPCRouter({
       return ctx.db.transactionCategoryMapping.create({
         data: {
           hash: input.hash,
-          categoryID: input.categoryID, // Convert to number
+          categoryId: input.categoryID, // Convert to number
           userId: ctx.session.user.id,
         },
         include: {
-          Category: {
+          category: {
             select: {
               id: true,
               name: true,
@@ -41,17 +41,17 @@ export const transactionCategoryMappingRouter = createTRPCRouter({
       },
     });
   }),
-  update: protectedProcedure.input(z.object({ hash: z.string(), categoryID: z.number()})).mutation(async ({ ctx, input }) => {
+  update: protectedProcedure.input(z.object({ hash: z.string(), categoryID: z.string()})).mutation(async ({ ctx, input }) => {
     return ctx.db.transactionCategoryMapping.update({
       where: {
         hash : input.hash,
       },
       data: {
-        categoryID: input.categoryID,
+        categoryId: input.categoryID,
       },
 
       include: {
-        Category: {
+        category: {
           select: {
             id: true,
             name: true,
@@ -66,7 +66,7 @@ export const transactionCategoryMappingRouter = createTRPCRouter({
       where: { userId: ctx.session.user.id },
       take: 1000,
       include: {
-        Category: {
+        category: {
           select: {
             id: true,
             name: true,
@@ -77,21 +77,21 @@ export const transactionCategoryMappingRouter = createTRPCRouter({
     });
   }),
 
-  upsert: protectedProcedure.input(z.object({ hash: z.string().min(1), categoryID: z.number(), })).mutation(async ({ ctx, input }) => {
+  upsert: protectedProcedure.input(z.object({ hash: z.string().min(1), categoryID: z.string(), })).mutation(async ({ ctx, input }) => {
     return ctx.db.transactionCategoryMapping.upsert({
       where: {
         hash: input.hash,
       },
       update: {
-        categoryID: input.categoryID,
+        categoryId: input.categoryID,
       },
       create: {
         hash: input.hash,
-        categoryID: input.categoryID,
+        categoryId: input.categoryID,
         userId: ctx.session.user.id,
       },
       include: {
-        Category: {
+        category: {
           select: {
             id: true,
             name: true,
