@@ -7,12 +7,19 @@ import {
   MenuItem,
   MenuList,
   Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Text,
 } from "@chakra-ui/react";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import type { Category } from "./types";
 import { api } from "~/utils/api";
 import { FieldValues, useForm } from "react-hook-form";
+import { DataContext } from "./data_context";
 
 const CategoryDisplay = ({ category }: { category: Category }) => {
   return (
@@ -30,14 +37,13 @@ const CategoryDisplay = ({ category }: { category: Category }) => {
 
 export default function CategorySelector({
   selectedCategory,
-  categories,
   onChange,
 }: {
   selectedCategory: Category | null;
-  categories: Category[];
   onChange: (category: Category) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const { categories } = useContext(DataContext);
 
   const { mutate } = api.category.create.useMutation();
 
@@ -74,7 +80,7 @@ export default function CategorySelector({
           {selectedCategory?.name ?? "Select Category"}
         </MenuButton>
         <MenuList>
-          {categories.map((category) => (
+          {categories?.map((category) => (
             <MenuItem onClick={() => onChange(category)} key={category.id}>
               <CategoryDisplay category={category} />
             </MenuItem>
@@ -84,16 +90,25 @@ export default function CategorySelector({
       </Menu>
       <Modal isOpen={open} onClose={() => setOpen(false)}>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Input
-            placeholder="Category Name"
-            {...register("name", { required: true })}
-          />
-          <Input
-            placeholder="Category Color"
-            {...register("color", { required: true })}
-          />
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Modal Title</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <Input
+                placeholder="Category Name"
+                {...register("name", { required: true })}
+              />
+              <Input
+                placeholder="Category Color"
+                {...register("color", { required: true })}
+              />
+            </ModalBody>
 
-          <Button type="submit">Save</Button>
+            <ModalFooter>
+              <Button type="submit">Save</Button>
+            </ModalFooter>
+          </ModalContent>
         </form>
       </Modal>
     </div>

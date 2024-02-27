@@ -5,7 +5,7 @@ export const categoryRouter = createTRPCRouter({
   create: protectedProcedure
     .input(z.object({
       name: z.string().min(1),
-      color: z.string().optional(),
+      color: z.string(),
     }))
     .mutation(async ({ ctx, input }) => {
       return ctx.db.category.create({
@@ -21,14 +21,14 @@ export const categoryRouter = createTRPCRouter({
         },
       });
     }),
-  delete: protectedProcedure.input(z.number()).mutation(async ({ ctx, input }) => {
+  delete: protectedProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
     return ctx.db.category.delete({
       where: {
         id: input,
       },
     });
   }),
-  get: protectedProcedure.input(z.number()).query(async ({ ctx, input }) => {
+  get: protectedProcedure.input(z.string()).query(async ({ ctx, input }) => {
     return ctx.db.category.findUnique({
       where: {
         id: input,
@@ -40,7 +40,7 @@ export const categoryRouter = createTRPCRouter({
       },
     });
   }),
-  update: protectedProcedure.input(z.object({ id: z.number(), name: z.string(), color: z.string().optional() })).mutation(async ({ ctx, input }) => {
+  update: protectedProcedure.input(z.object({ id: z.string(), name: z.string(), color: z.string().optional() })).mutation(async ({ ctx, input }) => {
     return ctx.db.category.update({
       where: {
         id: input.id,
@@ -67,10 +67,10 @@ export const categoryRouter = createTRPCRouter({
       take: 1000
     });
   }),
-  upsert: protectedProcedure.input(z.object({ id: z.number().optional(), name: z.string().min(1), color: z.string().optional(), userId: z.string() })).mutation(async ({ ctx, input }) => {
+  upsert: protectedProcedure.input(z.object({ id: z.string().optional(), name: z.string().min(1), color: z.string(), userId: z.string() })).mutation(async ({ ctx, input }) => {
     return ctx.db.category.upsert({
       where: {
-        id: input.id || -1,
+        id: input.id,
       },
       update: {
         name: input.name,

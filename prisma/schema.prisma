@@ -11,18 +11,35 @@ generator client {
     provider = "prisma-client-js"
 }
 
+model Transaction {
+    hash        String    @unique
+    date        DateTime
+    amount      Float
+    description String
+    userId      String
+    user        User      @relation(fields: [userId], references: [id])
+    categoryId  String?
+    category    Category? @relation(fields: [categoryId], references: [id])
+}
+
 model TransactionCategoryMapping {
-    userId String
-    user   User   @relation(fields: [userId], references: [id])
-    hash   String @unique
+    userId     String
+    user       User     @relation(fields: [userId], references: [id])
+    hash       String   @unique
+    category   Category @relation(fields: [categoryId], references: [id])
+    categoryId String
+
+    @@index([userId, categoryId, hash])
 }
 
 model Category {
-    id     Int     @id @default(autoincrement())
-    name   String
-    color  String?
-    userId String
-    user   User    @relation(fields: [userId], references: [id])
+    id                         String                       @id @default(cuid())
+    name                       String
+    color                      String
+    userId                     String
+    user                       User                         @relation(fields: [userId], references: [id])
+    transaction                Transaction[]
+    transactionCategoryMapping TransactionCategoryMapping[]
 
     @@unique([userId, name])
 }
@@ -64,6 +81,7 @@ model User {
     sessions                   Session[]
     TransactionCategoryMapping TransactionCategoryMapping[]
     Category                   Category[]
+    Transaction                Transaction[]
 }
 
 model VerificationToken {

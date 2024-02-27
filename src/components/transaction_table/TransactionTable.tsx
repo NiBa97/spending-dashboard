@@ -27,6 +27,7 @@ import { FaSort } from "react-icons/fa";
 import React from "react";
 import type { IconType } from "react-icons";
 import DeleteCell from "./DeleteCell";
+import CateogryCell from "./CategoryCell";
 const columnHelper = createColumnHelper<Transaction>();
 const columns = [
   columnHelper.accessor("Name", {
@@ -43,7 +44,12 @@ const columns = [
   }),
   columnHelper.accessor("Category", {
     header: "Category",
-    cell: (props) => props.getValue(),
+    cell: (props) =>
+      CateogryCell({
+        table: props.table,
+        row: props.row,
+        getValue: props.getValue,
+      }),
     // filterFn: (row, columnId, filterStatuses) => {
     //   if (filterStatuses.length === 0) return true;
     //   const status = row.getValue(columnId);
@@ -100,7 +106,7 @@ const TransanctionTable = ({
       updateData: (
         rowIndex: number,
         columnId: keyof Transaction,
-        value: string,
+        value: object,
       ) => {
         setData((prev: Transaction[] | null) =>
           prev

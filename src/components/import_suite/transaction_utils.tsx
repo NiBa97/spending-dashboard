@@ -1,5 +1,5 @@
 import type { Mapping, Transaction } from "../types";
-import _ from "lodash";
+import _, { update } from "lodash";
 import { createHash } from "crypto";
 import { api } from "~/utils/api";
 export function apply_existing_mappings(
@@ -74,39 +74,44 @@ export function groupAndSortTransactions(
 }
 
 export function get_next_group(
-  current_group: string,
+  current_group: string | null,
   grouped_transactions: Record<string, Transaction[]>,
 ) {
-  if (current_group === null) {
-    // get the first group
-    console.log("return", Object.keys(grouped_transactions)[0]);
-    return Object.keys(grouped_transactions)[0];
-  }
   const groupNames = Object.keys(grouped_transactions);
-
-  return groupNames.find(
-    (group, index) => group === current_group && index < groupNames.length - 1,
-  );
+  if (current_group === null) {
+    alert(groupNames[0]);
+    return groupNames[0];
+  }
+  // get the index of the current group, and return the value of the next index
+  const currentIndex = groupNames.indexOf(current_group);
+  console.log("currentIndex", currentIndex);
+  if (currentIndex === groupNames.length - 1) {
+    return undefined;
+  }
+  return groupNames[currentIndex + 1];
 }
 
-export function updateTransactions(transactions: Transaction[]) {
+export function useUpdateTransactions() {
   const { mutate } = api.transactionCategoryMapping.upsert.useMutation();
-  transactions.forEach((transaction) => {
-    //check if the transaction has a category
-    const hash = createHash("sha256")
-      .update(
-        JSON.stringify({
-          name: transaction.Name,
-          usage: transaction.Usage,
-          amount: transaction.Amount,
-          date: transaction.Date,
-        }),
-      )
-      .digest("hex");
+  function updateTransactions(transactions: Transaction[]) {
+    transactions.forEach((transaction) => {
+      //check if the transaction has a category
+      const hash = createHash("sha256")
+        .update(
+          JSON.stringify({
+            name: transaction.Name,
+            usage: transaction.Usage,
+            amount: transaction.Amount,
+            date: transaction.Date,
+          }),
+        )
+        .digest("hex");
 
-    mutate({
-      hash: hash,
-      categoryID: transaction.CategoryID!,
+      mutate({
+        hash: hash,
+        categoryID: transaction.Category?.id!,
+      });
     });
-  });
+  }
+  return updateTransactions;
 }

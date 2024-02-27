@@ -103,9 +103,7 @@ export default function TransactionCategoryTable({
                   checked={selectedRows.includes(transaction)}
                 />
               </td>
-              {static_columns.map((column, i) => (
-                <td key={i}>{transaction[column as keyof Transaction]}</td>
-              ))}
+
               <td>
                 <select
                   value={transaction.Category ?? ""}
