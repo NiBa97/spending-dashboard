@@ -18,7 +18,7 @@ import {
 import React, { useContext, useState } from "react";
 import type { Category } from "./types";
 import { api } from "~/utils/api";
-import { FieldValues, useForm } from "react-hook-form";
+import { type FieldValues, useForm } from "react-hook-form";
 import { DataContext } from "./data_context";
 
 const CategoryDisplay = ({ category }: { category: Category }) => {
@@ -50,17 +50,19 @@ export default function CategorySelector({
   const { register, handleSubmit, reset } = useForm();
   const utils = api.useUtils();
   const onSubmit = (data: FieldValues) => {
-    mutate(
-      { name: data.name, color: data.color },
+    void mutate(
+      { name: data.name as string, color: data.color as string },
       {
         onSuccess: (newCategory: Category) => {
-          // Handle the new category here
-          console.log(newCategory);
           //invalidate the get all query
-          utils.category.getAll.invalidate();
-          onChange(newCategory);
-          reset();
-          setOpen(false);
+          utils.category.getAll
+            .invalidate()
+            .then(() => {
+              onChange(newCategory);
+              reset();
+              setOpen(false);
+            })
+            .catch(console.error);
         },
       },
     );

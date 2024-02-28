@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import type { Transaction } from "../types";
+import type { Category, Transaction } from "../types";
 import {
   Box,
   Button,
@@ -48,7 +48,7 @@ const columns = [
       CateogryCell({
         table: props.table,
         row: props.row,
-        getValue: props.getValue,
+        category: props.getValue(),
       }),
     // filterFn: (row, columnId, filterStatuses) => {
     //   if (filterStatuses.length === 0) return true;
@@ -59,7 +59,8 @@ const columns = [
     filterFn: (row, columnIds, filterValue) => {
       if (!Array.isArray(filterValue)) return true;
       if (filterValue.length === 0) return true;
-      return filterValue.includes(row.getValue("Category"));
+      const category: Category = row.getValue("Category");
+      return filterValue.includes(category.id);
     },
   }),
   columnHelper.accessor("Date", {

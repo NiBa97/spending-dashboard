@@ -14,11 +14,14 @@ import {
 import { CiFilter } from "react-icons/ci";
 import { IconType } from "react-icons";
 
-import { ColorIcon } from "./CategoryCell";
+import ColorIcon from "./CategoryCell";
+import { Category } from "../types";
+import { useContext } from "react";
+import { DataContext } from "../data_context";
 const static_categories = ["Food", "Transport", "Entertainment", "Other"];
 
 interface CategoryItemProps {
-  category: string;
+  category: Category;
   setColumnFilters: React.Dispatch<React.SetStateAction<Filter[]>>;
   isActive: boolean;
 }
@@ -45,7 +48,7 @@ const CategoryItem = ({
         if (!category_filters) {
           return prev.concat({
             id: "Category",
-            value: [category],
+            value: [category.id],
           });
         }
 
@@ -54,8 +57,8 @@ const CategoryItem = ({
             ? {
                 ...f,
                 value: isActive
-                  ? category_filters.filter((c) => c !== category)
-                  : category_filters.concat(category),
+                  ? category_filters.filter((c) => c !== category.id)
+                  : category_filters.concat(category.id),
               }
             : f,
         );
@@ -65,8 +68,8 @@ const CategoryItem = ({
       });
     }}
   >
-    <ColorIcon color="blue" mr={3} />
-    {category}
+    {category.color}
+    {category.name}
   </Flex>
 );
 
@@ -86,6 +89,7 @@ const FilterPopover = ({
   const filterStatuses =
     columnFilters.find((f) => f.id === "Category")?.value ?? [];
 
+  const { categories } = useContext(DataContext);
   console.log("filterStatuses", filterStatuses);
   return (
     <Popover isLazy>
@@ -109,12 +113,12 @@ const FilterPopover = ({
             Status
           </Text>
           <VStack align="flex-start" spacing={1}>
-            {static_categories.map((category) => (
+            {categories?.map((category) => (
               <CategoryItem
                 category={category}
-                isActive={filterStatuses.includes(category)}
+                isActive={filterStatuses.includes(category.id)}
                 setColumnFilters={setColumnFilters}
-                key={category}
+                key={category.id}
               />
             ))}
           </VStack>
