@@ -5,10 +5,6 @@ import { DataContext } from "../../components/data_context";
 import TransactionTable from "../../components/transaction_table/TransactionTable";
 
 const TransactionTablePage = () => {
-  return (
-    <div>
-      <TransactionTable />
-    </div>
-  );
+  return <div></div>;
 };
 export default TransactionTablePage;

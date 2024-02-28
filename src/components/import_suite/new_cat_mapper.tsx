@@ -93,7 +93,7 @@ export function CategoryMapper({
         <div>
           <h1>test: {currentTransactions.length}</h1>
           <TransactionCategoryTable
-            input_transactions={currentTransactions!}
+            input_transactions={currentTransactions}
             onNext={(data: Transaction[]) => {
               setGroupedTransactions({
                 ...grouped_transactions,

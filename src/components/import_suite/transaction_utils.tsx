@@ -109,7 +109,7 @@ export function useUpdateTransactions() {
 
       mutate({
         hash: hash,
-        categoryID: transaction.Category?.id!,
+        categoryID: transaction.Category!.id,
       });
     });
   }
