@@ -38,7 +38,7 @@ const Navbar = () => {
   );
 };
 import { useEffect, useState } from "react";
-import { Transaction } from "../components/types";
+import type { Transaction } from "../components/types";
 import { useRouter } from "next/router";
 
 const MyApp: AppType<{ session: Session | null }> = ({

@@ -12,13 +12,10 @@ import {
   Flex,
 } from "@chakra-ui/react";
 import { CiFilter } from "react-icons/ci";
-import { IconType } from "react-icons";
-
-import ColorIcon from "./CategoryCell";
-import { Category } from "../types";
+import type { IconType } from "react-icons";
+import type { Category } from "../types";
 import { useContext } from "react";
 import { DataContext } from "../data_context";
-const static_categories = ["Food", "Transport", "Entertainment", "Other"];
 
 interface CategoryItemProps {
   category: Category;

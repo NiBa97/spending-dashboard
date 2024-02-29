@@ -1,5 +1,5 @@
 import type { Mapping, Transaction } from "../types";
-import _, { update } from "lodash";
+import _ from "lodash";
 import { createHash } from "crypto";
 import { api } from "~/utils/api";
 export function apply_existing_mappings(

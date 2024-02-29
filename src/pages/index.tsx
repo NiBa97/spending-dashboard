@@ -1,10 +1,9 @@
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { RouterOutputs, api } from "~/utils/api";
-import { useEffect, useState } from "react";
-import ImportSuite from "./import_suite";
+import { api } from "~/utils/api";
+import { useState } from "react";
 import CategorySelector from "~/components/categorySelector";
-import { Category } from "~/components/types";
+import type { Category } from "~/components/types";
 
 const MetaSidebar = () => {
   const { data: mapped_transaction_count } =

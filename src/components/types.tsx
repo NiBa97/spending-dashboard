@@ -4,7 +4,7 @@ export enum ImportStatus {
   CATEGORYMAPPING = "CATEGORYMAPPING",
   COMPLETE = "COMPLETE",
 }
-import { RouterOutputs, api } from "~/utils/api";
+import type { RouterOutputs } from "~/utils/api";
 
 export type Mapping =
   RouterOutputs["transactionCategoryMapping"]["getAll"][number];

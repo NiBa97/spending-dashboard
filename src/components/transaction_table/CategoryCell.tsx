@@ -1,7 +1,6 @@
-import { Box, Menu, MenuButton, MenuItem, MenuList } from "@chakra-ui/react";
 import CategorySelector from "../categorySelector";
-import { Row, TableMeta, Table, Getter } from "@tanstack/react-table";
-import { Category, Transaction } from "../types";
+import type { Row, TableMeta, Table } from "@tanstack/react-table";
+import type { Category, Transaction } from "../types";
 interface CustomTableMeta extends TableMeta<Category> {
   updateData: (
     rowIndex: number,

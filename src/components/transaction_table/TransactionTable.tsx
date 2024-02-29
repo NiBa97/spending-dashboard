@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import type { Category, Transaction } from "../types";
 import {
   Box,
@@ -22,7 +22,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import Filters from "./Filters";
-import { DataContext } from "../data_context";
 import { FaSort } from "react-icons/fa";
 import React from "react";
 import type { IconType } from "react-icons";
