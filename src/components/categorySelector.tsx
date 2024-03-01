@@ -20,7 +20,7 @@ import type { Category } from "./types";
 import { api } from "~/utils/api";
 import { type FieldValues, useForm } from "react-hook-form";
 import { DataContext } from "./data_context";
-
+import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 const CategoryDisplay = ({ category }: { category: Category }) => {
   return (
     <div key={category.id}>
@@ -78,6 +78,8 @@ export default function CategorySelector({
           p={1.5}
           bg={selectedCategory?.color ?? "transparent"}
           color="gray.900"
+          as={Button}
+          rightIcon={<FaChevronDown />}
         >
           {selectedCategory?.name ?? "Select Category"}
         </MenuButton>
