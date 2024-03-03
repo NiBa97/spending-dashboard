@@ -30,7 +30,7 @@ export default function TransactionCategoryTable({
   };
   return (
     <div>
-      <Box>
+      <Box width="200px">
         <CategorySelector
           selectedCategory={selectedCategory}
           onChange={(category: Category) => setSelectedCategory(category)}
@@ -43,6 +43,7 @@ export default function TransactionCategoryTable({
         onSave={() => {
           onNext(transactions!);
         }}
+        hideFilter={true}
       />
     </div>
   );

@@ -1,9 +1,11 @@
 import {
   Box,
   Button,
+  Divider,
   Input,
   Menu,
   MenuButton,
+  MenuDivider,
   MenuItem,
   MenuList,
   Modal,
@@ -23,15 +25,16 @@ import { DataContext } from "./data_context";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 const CategoryDisplay = ({ category }: { category: Category }) => {
   return (
-    <div key={category.id}>
+    <Box key={category.id} display="flex" alignItems="baseline">
       <Box
-        width="50px"
-        height="50px"
+        width="10px"
+        height="10px"
         backgroundColor={category.color ?? "black"}
+        borderRadius="50%"
+        mr="2"
       />
       <Text>{category.name}</Text>
-      <Text>{category.color}</Text>
-    </div>
+    </Box>
   );
 };
 
@@ -76,12 +79,15 @@ export default function CategorySelector({
           w="100%"
           textAlign="left"
           p={1.5}
-          bg={selectedCategory?.color ?? "transparent"}
           color="gray.900"
           as={Button}
           rightIcon={<FaChevronDown />}
         >
-          {selectedCategory?.name ?? "Select Category"}
+          {selectedCategory ? (
+            <CategoryDisplay category={selectedCategory} />
+          ) : (
+            "Select Category"
+          )}
         </MenuButton>
         <MenuList>
           {categories?.map((category) => (
@@ -89,6 +95,8 @@ export default function CategorySelector({
               <CategoryDisplay category={category} />
             </MenuItem>
           ))}
+
+          <MenuDivider />
           <MenuItem onClick={() => setOpen(true)}>Add New</MenuItem>
         </MenuList>
       </Menu>

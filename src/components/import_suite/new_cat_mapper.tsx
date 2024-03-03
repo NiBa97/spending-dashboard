@@ -26,6 +26,7 @@ export function CategoryMapper({
   const [grouped_transactions, setGroupedTransactions] = useState(
     groupAndSortTransactions(data, 3),
   );
+  console.log("grouped_transactions", grouped_transactions);
   const [currentTransactions, setCurrentTransactions] = useState<Transaction[]>(
     [],
   );
@@ -90,7 +91,6 @@ export function CategoryMapper({
       </h2>
       {currentGroup && (
         <div>
-          <h1>test: {currentTransactions.length}</h1>
           <TransactionCategoryTable
             input_transactions={currentTransactions}
             onNext={(data: Transaction[]) => {

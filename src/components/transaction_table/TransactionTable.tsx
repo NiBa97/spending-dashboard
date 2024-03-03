@@ -4,8 +4,10 @@ import {
   Box,
   Button,
   ButtonGroup,
+  Flex,
   Icon,
   Select,
+  Spacer,
   Table,
   Td,
   Text,
@@ -79,10 +81,12 @@ const TransanctionTable = ({
   data,
   setData,
   onSave,
+  hideFilter = false,
 }: {
   data: Transaction[] | null;
   setData: React.Dispatch<React.SetStateAction<Transaction[] | null>>;
   onSave: () => void;
+  hideFilter?: boolean;
 }) => {
   const [columnFilters, setColumnFilters] = useState<Filter[]>([]);
 
@@ -131,12 +135,14 @@ const TransanctionTable = ({
 
   return (
     <Box>
-      <Filters
-        columnFilters={columnFilters}
-        setColumnFilters={setColumnFilters}
-        globalFilter={globalFilter}
-        setGlobalFilter={setGlobalFilter}
-      />
+      {!hideFilter && (
+        <Filters
+          columnFilters={columnFilters}
+          setColumnFilters={setColumnFilters}
+          globalFilter={globalFilter}
+          setGlobalFilter={setGlobalFilter}
+        />
+      )}
       <Table className="w-full">
         {table.getHeaderGroups().map((headerGroup) => (
           <Tr className="tr" key={headerGroup.id}>
@@ -185,40 +191,47 @@ const TransanctionTable = ({
         ))}
       </Table>
       <br />
-      <Text mb={2}>
-        Page {table.getState().pagination.pageIndex + 1} of{" "}
-        {table.getPageCount()}
-      </Text>
-      <ButtonGroup size="sm" isAttached variant="outline">
-        <Button
-          onClick={() => table.previousPage()}
-          isDisabled={!table.getCanPreviousPage()}
-        >
-          {"<"}
+      <Flex justifyContent="space-between" alignItems="center">
+        <Text mb={2}>
+          Current rows: {table.getFilteredRowModel().rows?.length ?? 0}
+        </Text>
+        <ButtonGroup size="sm" isAttached variant="outline">
+          <Button
+            onClick={() => table.previousPage()}
+            isDisabled={!table.getCanPreviousPage()}
+          >
+            {"<"}
+          </Button>
+          <Text mb={2}>
+            Page {table.getState().pagination.pageIndex + 1} of{" "}
+            {table.getPageCount()}
+          </Text>
+          <Button
+            onClick={() => table.nextPage()}
+            isDisabled={!table.getCanNextPage()}
+          >
+            {">"}
+          </Button>
+        </ButtonGroup>
+        <Flex alignItems="center">
+          <Text width="auto">Rows per page:</Text>
+          <Select
+            defaultValue={10}
+            onChange={(e) => table.setPageSize(parseInt(e.target.value))}
+            width="80px"
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+          </Select>
+        </Flex>
+      </Flex>
+      <Flex justifyContent="center">
+        <Button onClick={onSave} margin={"8px auto"} justifyContent={"center"}>
+          Save
         </Button>
-        <Button
-          onClick={() => table.nextPage()}
-          isDisabled={!table.getCanNextPage()}
-        >
-          {">"}
-        </Button>
-      </ButtonGroup>
-      <Text mb={2}>
-        Current rows: {table.getFilteredRowModel().rows?.length ?? 0}
-      </Text>
-      <Text mb={2}>
-        Rows per page:
-        <Select
-          defaultValue={10}
-          onChange={(e) => table.setPageSize(parseInt(e.target.value))}
-        >
-          <option value={10}>10</option>
-          <option value={25}>25</option>
-          <option value={50}>50</option>
-          <option value={100}>100</option>
-        </Select>
-      </Text>
-      <Button onClick={onSave}>Save</Button>
+      </Flex>
     </Box>
   );
 };
