@@ -1,6 +1,8 @@
 import {
   Box,
   Button,
+  Divider,
+  Flex,
   Input,
   Menu,
   MenuButton,
@@ -20,6 +22,8 @@ import type { Category } from "./types";
 import { api } from "~/utils/api";
 import { type FieldValues, useForm } from "react-hook-form";
 import { DataContext } from "./data_context";
+import { FaChevronDown, FaChevronUp } from "react-icons/fa";
+import InputColor from "react-input-color";
 
 const CategoryDisplay = ({ category }: { category: Category }) => {
   return (
@@ -46,12 +50,13 @@ export default function CategorySelector({
   const { categories } = useContext(DataContext);
 
   const { mutate } = api.category.create.useMutation();
+  const [color, setColor] = useState({ hex: "#000000" });
 
   const { register, handleSubmit, reset } = useForm();
   const utils = api.useUtils();
   const onSubmit = (data: FieldValues) => {
     void mutate(
-      { name: data.name as string, color: data.color as string },
+      { name: data.name as string, color: color.hex as string },
       {
         onSuccess: (newCategory: Category) => {
           //invalidate the get all query
@@ -97,14 +102,17 @@ export default function CategorySelector({
             <ModalHeader>Modal Title</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
-              <Input
-                placeholder="Category Name"
-                {...register("name", { required: true })}
-              />
-              <Input
-                placeholder="Category Color"
-                {...register("color", { required: true })}
-              />
+              <Flex className="items-center">
+                <InputColor
+                  initialValue={""}
+                  onChange={(value) => setColor(value)}
+                  className="mr-1 !h-6 !w-6"
+                />
+                <Input
+                  placeholder="Category Name"
+                  {...register("name", { required: true })}
+                />
+              </Flex>
             </ModalBody>
 
             <ModalFooter>
