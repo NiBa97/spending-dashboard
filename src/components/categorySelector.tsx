@@ -1,11 +1,11 @@
 import {
   Box,
   Button,
-  Divider,
   Flex,
   Input,
   Menu,
   MenuButton,
+  MenuDivider,
   MenuItem,
   MenuList,
   Modal,
@@ -15,6 +15,9 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
   Text,
 } from "@chakra-ui/react";
 import React, { useContext, useState } from "react";
@@ -22,20 +25,20 @@ import type { Category } from "./types";
 import { api } from "~/utils/api";
 import { type FieldValues, useForm } from "react-hook-form";
 import { DataContext } from "./data_context";
-import { FaChevronDown, FaChevronUp } from "react-icons/fa";
-import InputColor from "react-input-color";
 
+import { SketchPicker } from "react-color";
 const CategoryDisplay = ({ category }: { category: Category }) => {
   return (
-    <div key={category.id}>
+    <Flex key={category.id} justifyItems={"center"} alignItems={"center"}>
       <Box
-        width="50px"
-        height="50px"
+        width="12px"
+        height="12px"
+        borderRadius="50%"
         backgroundColor={category.color ?? "black"}
+        marginRight={1}
       />
       <Text>{category.name}</Text>
-      <Text>{category.color}</Text>
-    </div>
+    </Flex>
   );
 };
 
@@ -50,13 +53,13 @@ export default function CategorySelector({
   const { categories } = useContext(DataContext);
 
   const { mutate } = api.category.create.useMutation();
-  const [color, setColor] = useState({ hex: "#000000" });
+  const [color, setColor] = useState("");
 
   const { register, handleSubmit, reset } = useForm();
   const utils = api.useUtils();
   const onSubmit = (data: FieldValues) => {
     void mutate(
-      { name: data.name as string, color: color.hex as string },
+      { name: data.name as string, color: color },
       {
         onSuccess: (newCategory: Category) => {
           //invalidate the get all query
@@ -76,15 +79,12 @@ export default function CategorySelector({
   return (
     <div>
       <Menu isLazy offset={[0, 0]} flip={false} autoSelect={false}>
-        <MenuButton
-          h="100%"
-          w="100%"
-          textAlign="left"
-          p={1.5}
-          bg={selectedCategory?.color ?? "transparent"}
-          color="gray.900"
-        >
-          {selectedCategory?.name ?? "Select Category"}
+        <MenuButton h="100%" w="100%" textAlign="left" p={1.5} color="gray.900">
+          {selectedCategory ? (
+            <CategoryDisplay category={selectedCategory} />
+          ) : (
+            "Select Category"
+          )}
         </MenuButton>
         <MenuList>
           {categories?.map((category) => (
@@ -92,6 +92,7 @@ export default function CategorySelector({
               <CategoryDisplay category={category} />
             </MenuItem>
           ))}
+          <MenuDivider />
           <MenuItem onClick={() => setOpen(true)}>Add New</MenuItem>
         </MenuList>
       </Menu>
@@ -99,22 +100,30 @@ export default function CategorySelector({
         <form onSubmit={handleSubmit(onSubmit)}>
           <ModalOverlay />
           <ModalContent>
-            <ModalHeader>Modal Title</ModalHeader>
+            <ModalHeader>Create Category</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
               <Flex className="items-center">
-                <InputColor
-                  initialValue={""}
-                  onChange={(value) => setColor(value)}
-                  className="mr-1 !h-6 !w-6"
-                />
+                <Popover>
+                  <PopoverTrigger>
+                    <Button bg={color} marginRight={4}>
+                      {color}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent width={"fit-content"}>
+                    <SketchPicker
+                      color={color}
+                      onChange={(color) => setColor(color.hex)}
+                    />
+                  </PopoverContent>
+                </Popover>
                 <Input
+                  {...register("name")}
                   placeholder="Category Name"
-                  {...register("name", { required: true })}
+                  required
                 />
               </Flex>
             </ModalBody>
-
             <ModalFooter>
               <Button type="submit">Save</Button>
             </ModalFooter>
