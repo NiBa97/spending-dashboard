@@ -1,8 +1,6 @@
 // write me a small page component that displays the transactiontable
 
-import React, { useContext } from "react";
-import { DataContext } from "../../components/data_context";
-import TransactionTable from "../../components/transaction_table/TransactionTable";
+import React from "react";
 
 const TransactionTablePage = () => {
   return <div></div>;

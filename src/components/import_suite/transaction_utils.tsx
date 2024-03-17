@@ -1,7 +1,7 @@
 import type { Mapping, Transaction } from "../types";
 import _, { update } from "lodash";
-import { createHash } from "crypto";
 import { api } from "~/utils/api";
+
 export function apply_existing_mappings(
   data: Record<string, Transaction[]>,
   all_mappings: Mapping[],
@@ -18,17 +18,9 @@ export function apply_existing_mappings(
   //iterate ofver all keys inside the data dict
   Object.keys(data).forEach((key) => {
     data[key]!.forEach((transaction: Transaction) => {
-      const hash = createHash("sha256")
-        .update(
-          JSON.stringify({
-            name: transaction.Name,
-            usage: transaction.Usage,
-            amount: transaction.Amount,
-            date: transaction.Date,
-          }),
-        )
-        .digest("hex");
-      const mapping = all_mappings.find((mapping) => mapping.hash === hash);
+      const mapping = all_mappings.find(
+        (mapping) => mapping.hash === transaction.Hash,
+      );
 
       if (mapping) {
         transaction.Category = mapping.category;
@@ -96,16 +88,7 @@ export function useUpdateTransactions() {
   function updateTransactions(transactions: Transaction[]) {
     transactions.forEach((transaction) => {
       //check if the transaction has a category
-      const hash = createHash("sha256")
-        .update(
-          JSON.stringify({
-            name: transaction.Name,
-            usage: transaction.Usage,
-            amount: transaction.Amount,
-            date: transaction.Date,
-          }),
-        )
-        .digest("hex");
+      const hash = transaction.Hash;
 
       mutate({
         hash: hash,

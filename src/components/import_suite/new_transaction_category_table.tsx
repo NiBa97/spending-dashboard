@@ -26,7 +26,8 @@ export default function TransactionCategoryTable({
 
   const setAllCategories = () => {
     const updatedTransactions = transactions?.map((transaction) => {
-      return { ...transaction, Category: selectedCategory };
+      transaction.Category = selectedCategory;
+      return transaction;
     });
     setTransactions(updatedTransactions!);
   };
@@ -41,7 +42,7 @@ export default function TransactionCategoryTable({
       </Box>
       <TransanctionTable
         data={transactions}
-        setData={setTransactions}
+        updateData={setTransactions}
         onSave={() => {
           onNext(transactions!);
         }}

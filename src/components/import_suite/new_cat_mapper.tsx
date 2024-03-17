@@ -9,7 +9,6 @@ import {
   useUpdateTransactions,
 } from "./transaction_utils";
 import TransactionCategoryTable from "./new_transaction_category_table";
-import { set } from "lodash";
 export function CategoryMapper({
   data,
   onNext, // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -1,7 +1,7 @@
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { RouterOutputs, api } from "~/utils/api";
-import { useEffect, useState } from "react";
+import { api } from "~/utils/api";
+import { useState } from "react";
 import CategorySelector from "~/components/categorySelector";
 import type { Category } from "~/components/types";
 import ImportSuite from "./import_suite";
