@@ -30,8 +30,8 @@ import DeleteCell from "./DeleteCell";
 import CateogryCell from "./CategoryCell";
 const columnHelper = createColumnHelper<Transaction>();
 const columns = [
-  columnHelper.accessor("Name", {
-    header: "Name",
+  columnHelper.accessor("Receiver", {
+    header: "Receiver",
     cell: (props) => props.getValue(),
   }),
   columnHelper.accessor("Usage", {
@@ -65,7 +65,7 @@ const columns = [
   }),
   columnHelper.accessor("Date", {
     header: "Date",
-    cell: (props) => props.getValue(),
+    cell: (props) => props.getValue().toDateString(),
   }),
   columnHelper.display({
     id: "Delete",
@@ -78,11 +78,11 @@ interface Filter {
 }
 const TransanctionTable = ({
   data,
-  setData,
+  updateData,
   onSave,
 }: {
   data: Transaction[] | null;
-  setData: React.Dispatch<React.SetStateAction<Transaction[] | null>>;
+  updateData: (newData: Transaction[] | null, refetch?: boolean) => void;
   onSave: () => void;
 }) => {
   const [columnFilters, setColumnFilters] = useState<Filter[]>([]);
@@ -104,28 +104,18 @@ const TransanctionTable = ({
     onGlobalFilterChange: setGlobalFilter,
     columnResizeMode: "onChange",
     meta: {
-      updateData: (
-        rowIndex: number,
-        columnId: keyof Transaction,
-        value: object,
-      ) => {
-        setData((prev: Transaction[] | null) =>
-          prev
-            ? prev.map((row: Transaction, index: number) =>
-                index === rowIndex
-                  ? {
-                      ...row,
-                      [columnId]: value,
-                    }
-                  : row,
-              )
-            : [],
-        );
+      updateCategory: (rowIndex: number, value: Category) => {
+        console.log("updateCategory", rowIndex, value);
+        const transaction = data[rowIndex];
+        console.log("transaction", transaction);
+        if (!transaction) return;
+        transaction.Category = value;
+        updateData([...data]);
       },
+
       deleteRow: (rowIndex: number) => {
-        setData((prev: Transaction[] | null) =>
-          prev ? prev.filter((_, index) => index !== rowIndex) : [],
-        );
+        data.splice(rowIndex, 1);
+        updateData([...data]);
       },
     },
   });

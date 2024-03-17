@@ -12,14 +12,15 @@ generator client {
 }
 
 model Transaction {
-    hash        String    @unique
-    date        DateTime
-    amount      Float
-    description String
-    userId      String
-    user        User      @relation(fields: [userId], references: [id])
-    categoryId  String?
-    category    Category? @relation(fields: [categoryId], references: [id])
+    hash       String    @unique
+    date       DateTime
+    amount     Float
+    receiver   String
+    usage      String
+    userId     String
+    user       User      @relation(fields: [userId], references: [id])
+    categoryId String?
+    category   Category? @relation(fields: [categoryId], references: [id])
 }
 
 model TransactionCategoryMapping {

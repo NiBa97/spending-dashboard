@@ -39,7 +39,7 @@ export default function ImportSuite() {
     }
   }, [transactions]);
   // get the DataContext from the app
-  const { data, setData } = useContext(DataContext);
+  const { data, updateData: setData } = useContext(DataContext);
 
   switch (importState) {
     case ImportStatus.FILEUPLOAD:

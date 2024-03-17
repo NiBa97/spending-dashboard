@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Transaction } from "../types";
+import { Transaction } from "../types";
 const target_columns = ["Date", "Name", "Usage", "Amount"];
 
 export function ColumnMapper({
@@ -15,7 +15,7 @@ export function ColumnMapper({
     Record<string, string>
   >({
     Date: "Buchung",
-    Name: "Auftraggeber/Empf�nger",
+    Receiver: "Auftraggeber/Empf�nger",
     Usage: "Verwendungszweck",
     Amount: "Betrag",
   });
@@ -36,21 +36,21 @@ export function ColumnMapper({
       .map((row) => {
         if (
           !selectedColumns.Date ||
-          !selectedColumns.Name ||
+          !selectedColumns.Receiver ||
           !selectedColumns.Usage ||
           !row[selectedColumns.Amount!]
         ) {
           return null;
         } else {
-          const newRow: Transaction = {
-            Date: row[selectedColumns.Date]!,
-            Name: row[selectedColumns.Name] ?? "Unkown",
+          const newRow = new Transaction({
+            DateString: row[selectedColumns.Date]!,
+            Receiver: row[selectedColumns.Receiver] ?? "Unkown",
             Usage: row[selectedColumns.Usage]!,
             Amount: parseFloat(
               row[selectedColumns.Amount!]!.replace(".", "").replace(",", "."),
             ),
             Category: null,
-          };
+          });
           return newRow;
         }
       })
