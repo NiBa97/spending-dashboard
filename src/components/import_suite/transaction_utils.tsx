@@ -34,8 +34,7 @@ export function groupAndSortTransactions(
   minCount: number,
 ): Record<string, Transaction[]> {
   // Group the transactions by name
-  const grouped = _.groupBy(transactions, "Name");
-
+  const grouped = _.groupBy(transactions, "Receiver");
   // Filter groups by member count and sort them
   const filteredGroups: Record<string, Transaction[]> = {};
   const otherGroup: Transaction[] = [];
@@ -84,13 +83,27 @@ export function get_next_group(
 }
 
 export function useUpdateTransactions() {
-  const { mutate } = api.transactionCategoryMapping.upsert.useMutation();
+  const { mutate: mapping } =
+    api.transactionCategoryMapping.upsert.useMutation();
+  const { mutate: transaction } = api.transactions.createMany.useMutation();
+
   function updateTransactions(transactions: Transaction[]) {
+    transaction(
+      transactions.map((transaction) => ({
+        date: transaction.Date,
+        hash: transaction.Hash,
+        categoryId: transaction.Category ? transaction.Category.id : "",
+        receiver: transaction.Receiver,
+        usage: transaction.Usage,
+        amount: transaction.Amount,
+      })),
+    );
+    return;
     transactions.forEach((transaction) => {
       //check if the transaction has a category
       const hash = transaction.Hash;
 
-      mutate({
+      mapping({
         hash: hash,
         categoryID: transaction.Category!.id,
       });

@@ -42,15 +42,20 @@ export function ColumnMapper({
         ) {
           return null;
         } else {
+          let receiver = row[selectedColumns.Receiver];
+          if (receiver === undefined || receiver === "") {
+            receiver = "Unknown";
+          }
           const newRow = new Transaction({
             DateString: row[selectedColumns.Date]!,
-            Receiver: row[selectedColumns.Receiver] ?? "Unkown",
+            Receiver: receiver,
             Usage: row[selectedColumns.Usage]!,
             Amount: parseFloat(
               row[selectedColumns.Amount!]!.replace(".", "").replace(",", "."),
             ),
             Category: null,
           });
+          console.log("newRow", newRow);
           return newRow;
         }
       })

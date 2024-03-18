@@ -65,7 +65,12 @@ const columns = [
   }),
   columnHelper.accessor("Date", {
     header: "Date",
-    cell: (props) => props.getValue().toDateString(),
+    cell: (props) =>
+      props.getValue().toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }),
   }),
   columnHelper.display({
     id: "Delete",
