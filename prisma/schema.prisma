@@ -21,6 +21,10 @@ model Transaction {
     user       User      @relation(fields: [userId], references: [id])
     categoryId String?
     category   Category? @relation(fields: [categoryId], references: [id])
+
+    @@id([userId, hash])
+    @@index([userId])
+    @@index([categoryId])
 }
 
 model TransactionCategoryMapping {
@@ -30,7 +34,9 @@ model TransactionCategoryMapping {
     category   Category @relation(fields: [categoryId], references: [id])
     categoryId String
 
-    @@index([userId, categoryId, hash])
+    @@id([userId, categoryId, hash])
+    @@index([userId])
+    @@index([categoryId])
 }
 
 model Category {

@@ -53,7 +53,7 @@ export const transactionsRouter = createTRPCRouter({
         z.object({
           hash: z.string().length(64),
           receiver: z.string().min(1),
-          usage: z.string().min(1),
+          usage: z.string(),
           amount: z.number(),
           date: z.date(),
           categoryId: z.string(),
@@ -67,11 +67,7 @@ export const transactionsRouter = createTRPCRouter({
         amount: transaction.amount,
         date: transaction.date,
         hash: transaction.hash,
-        category: {
-          connect: {
-            id: transaction.categoryId,
-          },
-        },
+        categoryId:  transaction.categoryId,
         userId: ctx.session.user.id,
       }));
 

@@ -7,6 +7,7 @@ export enum ImportStatus {
 import { createHash } from "crypto";
 import { RouterOutputs, api } from "~/utils/api";
 
+import moment from "moment";
 export type Mapping =
   RouterOutputs["transactionCategoryMapping"]["getAll"][number];
 
@@ -33,7 +34,21 @@ export class Transaction {
     Amount: number;
     Category: Category | null;
   }) {
-    this._Date = new Date(DateString);
+    console.log("DateString", DateString, typeof DateString);
+    if (typeof DateString === "string") {
+      this._Date = moment(DateString, [
+        "YYYY-MM-DD",
+        "DD/MM/YYYY",
+        "DD.MM.YYYY",
+      ])
+        .startOf("day")
+        .add(12, "hours")
+        .toDate();
+      console.log("Moment", moment(DateString));
+      console.log("Date", this._Date);
+    } else {
+      this._Date = DateString;
+    }
     this._Receiver = Receiver;
     this._Usage = Usage;
     this._Amount = Amount;
