@@ -5,8 +5,6 @@ import {
   protectedProcedure,
 } from "~/server/api/trpc";
 
-
-
 export const transactionCategoryMappingRouter = createTRPCRouter({
   create: protectedProcedure
     .input(z.object({
@@ -49,7 +47,6 @@ export const transactionCategoryMappingRouter = createTRPCRouter({
       data: {
         categoryId: input.categoryID,
       },
-
       include: {
         category: {
           select: {

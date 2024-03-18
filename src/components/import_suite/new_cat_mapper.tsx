@@ -99,6 +99,7 @@ export function CategoryMapper({
                 [currentGroup]: data,
               });
               updateTransactions(data);
+
               setNextGroup();
             }}
           />

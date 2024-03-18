@@ -12,19 +12,16 @@ generator client {
 }
 
 model Transaction {
-    hash       String    @unique
-    date       DateTime
-    amount     Float
-    receiver   String
-    usage      String
-    userId     String
-    user       User      @relation(fields: [userId], references: [id])
-    categoryId String?
-    category   Category? @relation(fields: [categoryId], references: [id])
+    hash     String   @unique
+    date     DateTime
+    amount   Float
+    receiver String
+    usage    String
+    userId   String
+    user     User     @relation(fields: [userId], references: [id])
 
     @@id([userId, hash])
     @@index([userId])
-    @@index([categoryId])
 }
 
 model TransactionCategoryMapping {
@@ -45,7 +42,6 @@ model Category {
     color                      String
     userId                     String
     user                       User                         @relation(fields: [userId], references: [id])
-    transaction                Transaction[]
     transactionCategoryMapping TransactionCategoryMapping[]
 
     @@unique([userId, name])
