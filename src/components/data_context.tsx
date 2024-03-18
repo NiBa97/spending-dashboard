@@ -32,20 +32,30 @@ export function TransactionProvider({
       }
     } else {
       // fetch data from server
-      const { data: fetchedData } = api.transactions.getAll.useQuery();
-      if (fetchedData) {
-        const transactions = fetchedData.map(
-          (transaction) =>
-            new Transaction({
-              DateString: transaction.date,
-              Receiver: transaction.receiver,
-              Usage: transaction.usage,
-              Amount: transaction.amount,
-              Category: transaction.category,
-            }),
-        );
-        setData(transactions);
-      }
+      Promise.all([
+        api.transactions.getAll.useQuery(),
+        api.transactionCategoryMapping.getAll.useQuery(),
+      ])
+        .then(([transactionResponse, categoryMappingResponse]) => {
+          if (transactionResponse.data && categoryMappingResponse.data) {
+            const transactions = transactionResponse.data.map((transaction) => {
+              const category = categoryMappingResponse.data.find(
+                (categoryMapping) => categoryMapping.hash === transaction.hash,
+              );
+              return new Transaction({
+                DateString: transaction.date,
+                Receiver: transaction.receiver,
+                Usage: transaction.usage,
+                Amount: transaction.amount,
+                Category: category ? category.category : null,
+              });
+            });
+            setData(transactions);
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching data:", error);
+        });
     }
   }, []);
 

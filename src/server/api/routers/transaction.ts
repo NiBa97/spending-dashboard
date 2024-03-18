@@ -13,18 +13,13 @@ export const transactionsRouter = createTRPCRouter({
       date: z.date(),
     }))
     .mutation(async ({ ctx, input }) => {
-      return ctx.db.transaction.create({
+      const transaction = await ctx.db.transaction.create({
         data: {
           hash: input.hash,
           receiver: input.receiver,
           usage: input.usage,
           amount: input.amount,
           date: input.date,
-          category: {
-            connect: {
-              id: input.categoryId,
-            },
-          },
           user: { 
             connect: {
               id: ctx.session.user.id
@@ -37,15 +32,18 @@ export const transactionsRouter = createTRPCRouter({
           usage: true,
           amount: true,
           date: true,
-          category: {
-            select: {
-              id: true,
-              name: true,
-              color: true,
-            },
-          }
         },
       });
+
+      await ctx.db.transactionCategoryMapping.create({
+        data: {
+          hash: input.hash,
+          categoryId: input.categoryId,
+          userId: ctx.session.user.id,
+        },
+      });
+
+      return transaction;
     }),
     createMany: protectedProcedure
     .input(
@@ -67,13 +65,24 @@ export const transactionsRouter = createTRPCRouter({
         amount: transaction.amount,
         date: transaction.date,
         hash: transaction.hash,
-        categoryId:  transaction.categoryId,
         userId: ctx.session.user.id,
       }));
 
-      return ctx.db.transaction.createMany({
+      await ctx.db.transaction.createMany({
         data: transactions,
       });
+
+      const mappings = input.map((transaction) => ({
+        hash: transaction.hash,
+        categoryId: transaction.categoryId,
+        userId: ctx.session.user.id,
+      }));
+
+      await ctx.db.transactionCategoryMapping.createMany({
+        data: mappings,
+      });
+
+      return transactions;
     }),
   delete: protectedProcedure.input(z.string().length(64)).mutation(async ({ ctx, input }) => {
     return ctx.db.transaction.delete({
@@ -93,13 +102,6 @@ export const transactionsRouter = createTRPCRouter({
         usage: true,
         amount: true,
         date: true,
-        category: {
-          select: {
-            id: true,
-            name: true,
-            color: true,
-          },
-        }
       },
     });
   }),
@@ -112,13 +114,6 @@ export const transactionsRouter = createTRPCRouter({
         usage: true,
         amount: true,
         date: true,
-        category: {
-          select: {
-            id: true,
-            name: true,
-            color: true,
-          },
-        },
       },
       take: 5000
     });
