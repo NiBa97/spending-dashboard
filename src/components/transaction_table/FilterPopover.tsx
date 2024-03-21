@@ -90,7 +90,6 @@ const FilterPopover = ({
     columnFilters.find((f) => f.id === "Category")?.value ?? [];
 
   const { categories } = useContext(DataContext);
-  console.log("filterStatuses", filterStatuses);
   return (
     <Popover isLazy>
       <PopoverTrigger>

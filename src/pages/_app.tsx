@@ -45,7 +45,6 @@ const MyApp: AppType<{ session: Session | null }> = ({
   Component,
   pageProps: { session, ...pageProps },
 }) => {
-  //alert user id
   const user = session?.user;
   return (
     <SessionProvider session={session}>

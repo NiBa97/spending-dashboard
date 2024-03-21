@@ -71,8 +71,6 @@ export function TransactionProvider({
   }, [data]);
 
   const handleUpdateData = (newData: Transaction[] | null, refetch = false) => {
-    alert("updating data");
-    console.log("newData", newData);
     setData(newData);
     if (refetch) {
       void api.useUtils().transactions.getAll.invalidate();

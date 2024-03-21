@@ -110,9 +110,7 @@ const TransanctionTable = ({
     columnResizeMode: "onChange",
     meta: {
       updateCategory: (rowIndex: number, value: Category) => {
-        console.log("updateCategory", rowIndex, value);
         const transaction = data[rowIndex];
-        console.log("transaction", transaction);
         if (!transaction) return;
         transaction.Category = value;
         updateData([...data]);

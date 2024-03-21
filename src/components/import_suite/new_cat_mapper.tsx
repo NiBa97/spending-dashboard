@@ -42,29 +42,21 @@ export function CategoryMapper({
   }, [all_mappings]);
 
   function setNextGroup() {
-    console.log("Object keys lwnght", Object.keys(grouped_transactions).length);
     if (Object.keys(grouped_transactions).length === 0) {
       return;
     }
     //Check if the current group is the last group
     let next_group = get_next_group(currentGroup, grouped_transactions);
-    console.log("next group", next_group);
     while (
       next_group &&
       grouped_transactions[next_group]!.every(
         (transaction) => transaction.Category !== null,
       )
     ) {
-      grouped_transactions[next_group]?.every((transaction) => {
-        console.log("transaction", transaction.Category);
-      });
       next_group = get_next_group(next_group, grouped_transactions);
-      console.log("next group", next_group);
     }
 
     if (next_group === undefined) {
-      alert("next group is undefined");
-      console.log("goruped transactions", grouped_transactions);
       //flatten the grouped data
       let flattenedData: Transaction[] = [];
       Object.values(grouped_transactions).forEach((group) => {
@@ -72,7 +64,6 @@ export function CategoryMapper({
       });
       onNext(flattenedData);
     } else {
-      console.log("setting next group", next_group);
       setCurrentGroup(next_group);
       setCurrentTransactions(grouped_transactions[next_group]!);
     }

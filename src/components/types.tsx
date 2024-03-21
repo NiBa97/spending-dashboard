@@ -34,7 +34,6 @@ export class Transaction {
     Amount: number;
     Category: Category | null;
   }) {
-    console.log("DateString", DateString, typeof DateString);
     if (typeof DateString === "string") {
       this._Date = moment(DateString, [
         "YYYY-MM-DD",
@@ -44,8 +43,6 @@ export class Transaction {
         .startOf("day")
         .add(12, "hours")
         .toDate();
-      console.log("Moment", moment(DateString));
-      console.log("Date", this._Date);
     } else {
       this._Date = DateString;
     }
