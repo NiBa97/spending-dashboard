@@ -20,7 +20,6 @@ export function ColumnMapper({
     Amount: "Betrag",
   });
   if (data === undefined) {
-    alert("No file uploaded");
     onBack();
   }
   const columns = Object.keys(data);
@@ -55,7 +54,6 @@ export function ColumnMapper({
             ),
             Category: null,
           });
-          console.log("newRow", newRow);
           return newRow;
         }
       })

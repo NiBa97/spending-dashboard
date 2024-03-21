@@ -83,8 +83,6 @@ export default function ImportSuite() {
           data={columnised_data}
           onBack={() => setImportState(ImportStatus.COLUMNMAPPING)}
           onNext={(mapped_data) => {
-            console.log("received data from component", mapped_data);
-
             setMappedData(mapped_data);
             setImportState(ImportStatus.COMPLETE);
           }}

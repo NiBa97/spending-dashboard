@@ -70,7 +70,6 @@ export function get_next_group(
 ) {
   const groupNames = Object.keys(grouped_transactions);
   if (current_group === null) {
-    alert(groupNames[0]);
     return groupNames[0];
   }
   // get the index of the current group, and return the value of the next index
