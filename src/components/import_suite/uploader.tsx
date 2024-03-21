@@ -3,13 +3,13 @@ import Papa from "papaparse";
 export default function UploadComponent({
   onNext,
 }: {
-  onNext: (data: object) => void;
+  onNext: (data: Record<string, string>[]) => void;
 }) {
   const onDrop = (acceptedFiles: File[]) => {
     Papa.parse(acceptedFiles[0]!, {
       header: true,
       complete: function (results: Papa.ParseResult<object>) {
-        onNext(results.data); // get the first 5 rows
+        onNext(results.data as Record<string, string>[]); // get the first 5 rows
       },
     });
   };

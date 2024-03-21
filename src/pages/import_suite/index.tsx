@@ -16,24 +16,28 @@ export default function ImportSuite() {
   const [columnised_data, setColumnisedData] = useState<Transaction[]>([]);
   const [mapped_data, setMappedData] = useState<Transaction[]>([]);
 
+  const [transactions, setTransactions] = useState<
+    Record<string, string>[] | null
+  >(null);
   //Check if the filepath is set as query param
   const router = useRouter();
-  const { transactions } = router.query;
   useEffect(() => {
-    if (transactions) {
-      console.log("transactions", transactions);
-      if (typeof transactions !== "string") {
+    if (typeof window !== "undefined") {
+      const localData = localStorage.getItem("raw_data");
+      if (localData === null) {
         return;
       }
-      const parsed_transactions = JSON.parse(transactions) as Record<
-        string,
-        string
-      >[];
+      setTransactions(JSON.parse(localData) as Record<string, string>[]);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (transactions !== null) {
       if (
-        Array.isArray(parsed_transactions) &&
-        parsed_transactions.every((item) => typeof item === "object")
+        Array.isArray(transactions) &&
+        transactions.every((item) => typeof item === "object")
       ) {
-        setImportedData(parsed_transactions);
+        setImportedData(transactions);
         setImportState(ImportStatus.COLUMNMAPPING);
       }
     }
@@ -45,18 +49,24 @@ export default function ImportSuite() {
     case ImportStatus.FILEUPLOAD:
       return (
         <UploadComponent
-          onNext={(raw_data: object) => {
-            void router.push(
-              {
-                pathname: "/import_suite",
-                query: { transactions: JSON.stringify(raw_data) },
-              },
-              "/import_suite",
-            );
+          onNext={(raw_data: Record<string, string>[]) => {
+            if (router.pathname === "/import_suite") {
+              setTransactions(raw_data);
+            } else {
+              localStorage.setItem("raw_data", JSON.stringify(raw_data));
+              void router.push(
+                {
+                  pathname: "/import_suite",
+                },
+                "/import_suite",
+              );
+            }
           }}
         />
       );
     case ImportStatus.COLUMNMAPPING:
+      //reset the local storage
+      localStorage.removeItem("raw_data");
       return (
         <ColumnMapper
           data={imported_data}
