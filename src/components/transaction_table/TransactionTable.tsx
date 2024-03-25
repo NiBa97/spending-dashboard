@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import type { Category, Transaction } from "../types";
 import {
   Box,
@@ -22,7 +22,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import Filters from "./Filters";
-import { DataContext } from "../data_context";
 import { FaSort } from "react-icons/fa";
 import React from "react";
 import type { IconType } from "react-icons";
@@ -65,12 +64,18 @@ const columns = [
   }),
   columnHelper.accessor("Date", {
     header: "Date",
-    cell: (props) =>
-      props.getValue().toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      }),
+    cell: (props) => {
+      let dateValue = props.getValue();
+      if (dateValue instanceof Date) {
+        return dateValue.toLocaleDateString(undefined, {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        });
+      } else {
+        return dateValue; // or return a default/fallback value
+      }
+    },
   }),
   columnHelper.display({
     id: "Delete",

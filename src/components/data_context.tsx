@@ -20,8 +20,11 @@ export function TransactionProvider({
 }) {
   const [data, setData] = useState<Transaction[] | null>(null);
   const { data: categories } = api.category.getAll.useQuery();
+  const transactionResponse = api.transactions.getAll.useQuery();
+  const categoryMappingResponse =
+    api.transactionCategoryMapping.getAll.useQuery();
 
-  const store_on_local_storage = true;
+  const store_on_local_storage = false;
 
   // Load data from localStorage when component mounts
   useEffect(() => {
@@ -30,34 +33,26 @@ export function TransactionProvider({
       if (savedData && savedData.length > 0) {
         setData(JSON.parse(savedData) as Transaction[]);
       }
-    } else {
-      // fetch data from server
-      Promise.all([
-        api.transactions.getAll.useQuery(),
-        api.transactionCategoryMapping.getAll.useQuery(),
-      ])
-        .then(([transactionResponse, categoryMappingResponse]) => {
-          if (transactionResponse.data && categoryMappingResponse.data) {
-            const transactions = transactionResponse.data.map((transaction) => {
-              const category = categoryMappingResponse.data.find(
-                (categoryMapping) => categoryMapping.hash === transaction.hash,
-              );
-              return new Transaction({
-                DateString: transaction.date,
-                Receiver: transaction.receiver,
-                Usage: transaction.usage,
-                Amount: transaction.amount,
-                Category: category ? category.category : null,
-              });
-            });
-            setData(transactions);
-          }
-        })
-        .catch((error) => {
-          console.error("Error fetching data:", error);
+    } else if (transactionResponse.data && categoryMappingResponse.data) {
+      const transactions = transactionResponse.data.map((transaction) => {
+        const category = categoryMappingResponse.data.find(
+          (categoryMapping) => categoryMapping.hash === transaction.hash,
+        );
+        return new Transaction({
+          DateString: transaction.date,
+          Receiver: transaction.receiver,
+          Usage: transaction.usage,
+          Amount: transaction.amount,
+          Category: category ? category.category : null,
         });
+      });
+      setData(transactions);
     }
-  }, []);
+  }, [
+    transactionResponse.data,
+    categoryMappingResponse.data,
+    store_on_local_storage,
+  ]);
 
   // Save data to localStorage whenever it changes
   useEffect(() => {
