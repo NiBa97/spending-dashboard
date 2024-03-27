@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Category, Transaction } from "../types";
 import TransanctionTable from "../transaction_table/TransactionTable";
-import { api } from "~/utils/api";
 import CategorySelector from "../categorySelector";
 import { Box, Button } from "@chakra-ui/react";
 
@@ -22,11 +21,10 @@ export default function TransactionCategoryTable({
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
     null,
   );
-  const { data: categories } = api.category.getAll.useQuery();
 
   const setAllCategories = () => {
     const updatedTransactions = transactions?.map((transaction) => {
-      transaction.Category = selectedCategory;
+      transaction.category = selectedCategory;
       return transaction;
     });
     setTransactions(updatedTransactions!);

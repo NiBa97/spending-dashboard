@@ -8,7 +8,14 @@ export function ColumnMapper({
   onBack,
 }: {
   data: Record<string, string>[];
-  onNext: (data: Transaction[]) => void;
+  onNext: (
+    transactions: {
+      date: Date;
+      receiver: string;
+      usage: string;
+      amount: number;
+    }[],
+  ) => void;
   onBack: () => void;
 }) {
   const [selectedColumns, setSelectedColumns] = useState<
@@ -31,34 +38,55 @@ export function ColumnMapper({
   };
 
   const handleSubmit = () => {
-    const mappedData: Transaction[] = data
-      .map((row) => {
-        if (
-          !selectedColumns.Date ||
-          !selectedColumns.Receiver ||
-          !selectedColumns.Usage ||
-          !row[selectedColumns.Amount!]
-        ) {
-          return null;
-        } else {
-          let receiver = row[selectedColumns.Receiver];
-          if (receiver === undefined || receiver === "") {
-            receiver = "Unknown";
-          }
-          const newRow = new Transaction({
-            DateString: row[selectedColumns.Date]!,
-            Receiver: receiver,
-            Usage: row[selectedColumns.Usage]!,
-            Amount: parseFloat(
-              row[selectedColumns.Amount!]!.replace(".", "").replace(",", "."),
-            ),
-            Category: null,
-          });
-          return newRow;
+    const mappedData = data.map((row) => {
+      if (
+        !selectedColumns.Date ||
+        !selectedColumns.Receiver ||
+        !selectedColumns.Usage ||
+        !row[selectedColumns.Amount!]
+      ) {
+        return null;
+      } else {
+        let receiver = row[selectedColumns.Receiver];
+        if (receiver === undefined || receiver === "") {
+          receiver = "Unknown";
         }
-      })
-      .filter((item): item is Transaction => item !== null);
-    onNext(mappedData);
+        const [day, month, year] = row[selectedColumns.Date]!.split(".");
+        if (day === undefined || month === undefined || year === undefined) {
+          return null;
+        }
+        const date = new Date(
+          parseInt(year),
+          parseInt(month) - 1,
+          parseInt(day),
+        );
+        const newRow = {
+          date: date,
+          receiver: receiver,
+          usage: row[selectedColumns.Usage]!,
+          amount: parseFloat(
+            row[selectedColumns.Amount!]!.replace(".", "").replace(",", "."),
+          ),
+          category: null,
+        };
+        return newRow;
+      }
+    });
+    const filteredData = mappedData
+      .filter(
+        (
+          item,
+        ): item is {
+          date: Date;
+          receiver: string;
+          usage: string;
+          amount: number;
+          category: null;
+        } => item !== null,
+      )
+      .map(({ category, ...rest }) => rest);
+
+    onNext(filteredData);
   };
   return (
     <div>

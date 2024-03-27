@@ -1,21 +1,17 @@
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { api } from "~/utils/api";
 import { useState } from "react";
 import CategorySelector from "~/components/categorySelector";
 import type { Category } from "~/components/types";
 import ImportSuite from "./import_suite";
 
 const MetaSidebar = () => {
-  const { data: mapped_transaction_count } =
-    api.transactionCategoryMapping.getAllCount.useQuery();
   return (
     <>
       <h2 className="text-2xl font-bold">Meta</h2>
       <div className="flex flex-col gap-2">
         <div>
           <h3 className="text-lg font-bold">Transaction Category Mappings</h3>
-          <p>{mapped_transaction_count}</p>
         </div>
       </div>{" "}
     </>

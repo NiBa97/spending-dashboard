@@ -1,5 +1,4 @@
 import { createTRPCRouter } from "~/server/api/trpc";
-import { transactionCategoryMappingRouter } from "./routers/transactionCategoryMapping";
 import { categoryRouter } from "./routers/category";
 import { transactionsRouter } from "./routers/transaction";
 
@@ -9,7 +8,6 @@ import { transactionsRouter } from "./routers/transaction";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
-  transactionCategoryMapping: transactionCategoryMappingRouter,
   category: categoryRouter,
   transactions: transactionsRouter,
 });

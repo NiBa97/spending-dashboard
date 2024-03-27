@@ -30,19 +30,19 @@ import DeleteCell from "./DeleteCell";
 import CateogryCell from "./CategoryCell";
 const columnHelper = createColumnHelper<Transaction>();
 const columns = [
-  columnHelper.accessor("Receiver", {
+  columnHelper.accessor("receiver", {
     header: "Receiver",
     cell: (props) => props.getValue(),
   }),
-  columnHelper.accessor("Usage", {
+  columnHelper.accessor("usage", {
     header: "Usage",
     cell: (props) => props.getValue(),
   }),
-  columnHelper.accessor("Amount", {
+  columnHelper.accessor("amount", {
     header: "Amount",
     cell: (props) => props.getValue(),
   }),
-  columnHelper.accessor("Category", {
+  columnHelper.accessor("category", {
     header: "Category",
     cell: (props) =>
       CateogryCell({
@@ -63,7 +63,7 @@ const columns = [
       return filterValue.includes(category.id);
     },
   }),
-  columnHelper.accessor("Date", {
+  columnHelper.accessor("date", {
     header: "Date",
     cell: (props) =>
       props.getValue().toLocaleDateString(undefined, {
@@ -112,7 +112,7 @@ const TransanctionTable = ({
       updateCategory: (rowIndex: number, value: Category) => {
         const transaction = data[rowIndex];
         if (!transaction) return;
-        transaction.Category = value;
+        transaction.category = value;
         updateData([...data]);
       },
 

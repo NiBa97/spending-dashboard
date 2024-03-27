@@ -1,9 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Transaction } from "../types";
-import { api } from "~/utils/api";
 
 import {
-  apply_existing_mappings,
   get_next_group,
   groupAndSortTransactions,
   useUpdateTransactions,
@@ -19,8 +17,6 @@ export function CategoryMapper({
   onBack: () => void;
 }) {
   const [currentGroup, setCurrentGroup] = useState<string | null>(null);
-  const { data: all_mappings } =
-    api.transactionCategoryMapping.getAll.useQuery();
   const updateTransactions = useUpdateTransactions();
 
   const [grouped_transactions, setGroupedTransactions] = useState(
@@ -30,16 +26,9 @@ export function CategoryMapper({
     [],
   );
   useEffect(() => {
-    if (!all_mappings) {
-      return;
-    }
-    const updatedGroupedTransactions = apply_existing_mappings(
-      grouped_transactions,
-      all_mappings,
-    );
-    setGroupedTransactions(updatedGroupedTransactions);
+    setGroupedTransactions(grouped_transactions);
     setNextGroup();
-  }, [all_mappings]);
+  }, []);
 
   function setNextGroup() {
     if (Object.keys(grouped_transactions).length === 0) {
@@ -50,7 +39,7 @@ export function CategoryMapper({
     while (
       next_group &&
       grouped_transactions[next_group]!.every(
-        (transaction) => transaction.Category !== null,
+        (transaction) => transaction.category !== null,
       )
     ) {
       next_group = get_next_group(next_group, grouped_transactions);
