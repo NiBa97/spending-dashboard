@@ -5,17 +5,15 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 export const transactionsRouter = createTRPCRouter({
   create: protectedProcedure
     .input(z.object({
-      hash: z.string().length(64),
       receiver: z.string().min(1),
       usage: z.string().min(1),
       amount: z.number(),
-      categoryId: z.string(),
+      categoryId: z.string().optional(),
       date: z.date(),
     }))
     .mutation(async ({ ctx, input }) => {
-      const transaction = await ctx.db.transaction.create({
+      return ctx.db.transaction.create({
         data: {
-          hash: input.hash,
           receiver: input.receiver,
           usage: input.usage,
           amount: input.amount,
@@ -27,77 +25,90 @@ export const transactionsRouter = createTRPCRouter({
           }
         },
         select: {
-          hash: true,
+          id:true,
           receiver: true,
           usage: true,
           amount: true,
           date: true,
         },
       });
-
-      await ctx.db.transactionCategoryMapping.create({
-        data: {
-          hash: input.hash,
-          categoryId: input.categoryId,
-          userId: ctx.session.user.id,
-        },
-      });
-
-      return transaction;
     }),
     createMany: protectedProcedure
     .input(
       z.array(
         z.object({
-          hash: z.string().length(64),
           receiver: z.string().min(1),
           usage: z.string(),
           amount: z.number(),
           date: z.date(),
-          categoryId: z.string(),
         }),
       ),
     )
     .mutation(async ({ ctx, input }) => {
-      const transactions = input.map((transaction) => ({
-        receiver: transaction.receiver,
-        usage: transaction.usage,
-        amount: transaction.amount,
-        date: transaction.date,
-        hash: transaction.hash,
-        userId: ctx.session.user.id,
-      }));
+      const createdTransactions = [];
 
-      await ctx.db.transaction.createMany({
-        data: transactions,
+    for (const transaction of input) {
+      const createdTransaction = await ctx.db.transaction.create({
+        data: {
+          receiver: transaction.receiver,
+          usage: transaction.usage,
+          amount: transaction.amount,
+          date: transaction.date,
+          user: {
+            connect: {
+              id: ctx.session.user.id,
+            },
+          },
+        },
       });
 
-      const mappings = input.map((transaction) => ({
-        hash: transaction.hash,
-        categoryId: transaction.categoryId,
-        userId: ctx.session.user.id,
-      }));
+      createdTransactions.push(createdTransaction);
+    }
 
-      await ctx.db.transactionCategoryMapping.createMany({
-        data: mappings,
-      });
-
-      return transactions;
+    return createdTransactions;
     }),
-  delete: protectedProcedure.input(z.string().length(64)).mutation(async ({ ctx, input }) => {
+    update: protectedProcedure
+    .input(z.object({id:z.string().length(30), data: z.object({
+      receiver: z.string().min(1).optional(),
+      usage: z.string().min(1).optional(),
+      amount: z.number().optional(),
+      date: z.date().optional(),
+      categoryId: z.string().optional(),
+    })})).mutation(async ({ ctx, input }) => {
+      return ctx.db.transaction.update({
+        where: {
+          id: input.id,
+          userId: ctx.session.user.id,
+        },
+        data: {
+          receiver: input.data.receiver,
+          usage: input.data.usage,
+          amount: input.data.amount,
+          date: input.data.date,
+          category: {
+            connect: {
+              id: input.data.categoryId,
+            },
+          },
+        },
+      });
+    }),
+  delete: protectedProcedure.input(z.string().length(30)).mutation(async ({ ctx, input }) => {
     return ctx.db.transaction.delete({
       where: {
-        hash: input,
+        id: input,
+        userId: ctx.session.user.id,
       },
     });
   }),
-  get: protectedProcedure.input(z.string().length(64)).query(async ({ ctx, input }) => {
+  get: protectedProcedure.input(z.string().length(30)).query(async ({ ctx, input }) => {
     return ctx.db.transaction.findUnique({
       where: {
-        hash: input,
+        id: input,
+        userId: ctx.session.user.id, 
       },
       select: {
-        hash: true,
+        id: true,
         receiver: true,
         usage: true,
         amount: true,
@@ -109,11 +120,19 @@ export const transactionsRouter = createTRPCRouter({
     return ctx.db.transaction.findMany({
       where: { userId: ctx.session.user.id },
       select: {
-        hash: true,
+        id:true,
         receiver: true,
         usage: true,
         amount: true,
         date: true,
+        category: {
+          select: {
+            id: true,
+            name: true,
+            color: true,
+          },
+        },
+        
       },
       take: 5000
     });

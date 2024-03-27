@@ -3,13 +3,39 @@ import { Category, Transaction } from "./types";
 import { api } from "~/utils/api";
 interface DataContextProps {
   data: Transaction[] | null;
-  updateData: (newData: Transaction[] | null, refetch?: boolean) => void;
+  handleUpdateTransaction: (
+    id: string,
+    updatedFields: Partial<Transaction>,
+  ) => Promise<void>;
+  handleCreateTransaction: (transaction: Partial<Transaction>) => Promise<void>;
+  handleCreateManyTransactions: (
+    transactions: {
+      date: Date;
+      receiver: string;
+      usage: string;
+      amount: number;
+    }[],
+  ) => Promise<void>;
+  handleDeleteTransaction: (id: string) => Promise<void>;
   categories: Category[] | null;
 }
 
 export const DataContext = createContext<DataContextProps>({
   data: null,
-  updateData: (newData: Transaction[] | null, refetch?: boolean) => {}, // eslint-disable-line @typescript-eslint/no-empty-function
+  handleUpdateTransaction: async (
+    id: string,
+    updatedFields: Partial<Transaction>,
+  ) => {}, // eslint-disable-line @typescript-eslint/no-empty-function
+  handleCreateTransaction: async (transaction: Partial<Transaction>) => {}, // eslint-disable-line @typescript-eslint/no-empty-function
+  handleCreateManyTransactions: async (
+    transactions: {
+      date: Date;
+      receiver: string;
+      usage: string;
+      amount: number;
+    }[],
+  ) => {}, // eslint-disable-line @typescript-eslint/no-empty-function
+  handleDeleteTransaction: async (id: string) => {}, // eslint-disable-line @typescript-eslint/no-empty-function
   categories: null,
 });
 
@@ -19,69 +45,95 @@ export function TransactionProvider({
   children: React.ReactNode;
 }) {
   const [data, setData] = useState<Transaction[] | null>(null);
-  const { data: categories } = api.category.getAll.useQuery();
+  const [categories, setCategories] = useState<Category[] | null>(null);
 
-  const store_on_local_storage = true;
+  const { data: transactionsData } = api.transactions.getAll.useQuery();
+  const { data: categoriesData } = api.category.getAll.useQuery();
 
-  // Load data from localStorage when component mounts
   useEffect(() => {
-    if (store_on_local_storage) {
-      const savedData = localStorage.getItem("data");
-      if (savedData && savedData.length > 0) {
-        setData(JSON.parse(savedData) as Transaction[]);
+    if (transactionsData) {
+      setData(transactionsData);
+    }
+  }, [transactionsData]);
+
+  useEffect(() => {
+    if (categoriesData) {
+      setCategories(categoriesData);
+    }
+  }, [categoriesData]);
+  const { mutate: addMutation } = api.transactions.create.useMutation();
+  const { mutate: deleteMutation } = api.transactions.delete.useMutation();
+  const { mutate: createManyMutation } =
+    api.transactions.createMany.useMutation();
+
+  const handleCreateTransaction = async (transaction: Partial<Transaction>) => {
+    if (
+      !transaction.date ||
+      !transaction.amount ||
+      !transaction.receiver ||
+      !transaction.usage
+    ) {
+      throw new Error("Missing fields!");
+    }
+    addMutation({
+      date: transaction.date,
+      amount: transaction.amount,
+      receiver: transaction.receiver,
+      usage: transaction.usage,
+      categoryId: transaction.category?.id?.toString() ?? undefined,
+    });
+  };
+
+  const handleCreateManyTransactions = async (
+    transactions: {
+      date: Date;
+      receiver: string;
+      usage: string;
+      amount: number;
+    }[],
+  ) => {
+    transactions.forEach((transaction, index) => {
+      if (
+        transaction.date === undefined ||
+        transaction.amount === undefined ||
+        transaction.receiver === undefined ||
+        transaction.usage === undefined
+      ) {
+        console.log(transaction);
+        throw new Error(`Missing fields in transaction at index ${index}!`);
       }
-    } else {
-      // fetch data from server
-      Promise.all([
-        api.transactions.getAll.useQuery(),
-        api.transactionCategoryMapping.getAll.useQuery(),
-      ])
-        .then(([transactionResponse, categoryMappingResponse]) => {
-          if (transactionResponse.data && categoryMappingResponse.data) {
-            const transactions = transactionResponse.data.map((transaction) => {
-              const category = categoryMappingResponse.data.find(
-                (categoryMapping) => categoryMapping.hash === transaction.hash,
-              );
-              return new Transaction({
-                DateString: transaction.date,
-                Receiver: transaction.receiver,
-                Usage: transaction.usage,
-                Amount: transaction.amount,
-                Category: category ? category.category : null,
-              });
-            });
-            setData(transactions);
-          }
-        })
-        .catch((error) => {
-          console.error("Error fetching data:", error);
-        });
-    }
-  }, []);
+    });
+    alert("Creating many transactions");
+    console.log(transactions);
+    return createManyMutation(
+      transactions.map((transaction) => ({
+        date: transaction.date,
+        amount: transaction.amount,
+        receiver: transaction.receiver,
+        usage: transaction.usage,
+      })),
+    );
+  };
+  const handleDeleteTransaction = async (id: string) => {
+    deleteMutation(id);
+  };
+  const { mutate: updateMutation } = api.transactions.update.useMutation();
 
-  // Save data to localStorage whenever it changes
-  useEffect(() => {
-    if (data === null) {
-      return;
-    }
-    if (store_on_local_storage) {
-      localStorage.setItem("data", JSON.stringify(data));
-    } else {
-    }
-  }, [data]);
-
-  const handleUpdateData = (newData: Transaction[] | null, refetch = false) => {
-    setData(newData);
-    if (refetch) {
-      void api.useUtils().transactions.getAll.invalidate();
-    }
+  const handleUpdateTransaction = async (
+    id: string,
+    updatedFields: Partial<Transaction>,
+  ) => {
+    updateMutation({ id, data: updatedFields });
   };
 
   return (
     <DataContext.Provider
       value={{
         data: data,
-        updateData: handleUpdateData,
+        handleUpdateTransaction: handleUpdateTransaction, // eslint-disable-line @typescript-eslint/no-empty-function
+        handleCreateTransaction: handleCreateTransaction,
+        handleCreateManyTransactions: handleCreateManyTransactions,
+        handleDeleteTransaction: handleDeleteTransaction,
         categories: categories ?? null,
       }}
     >

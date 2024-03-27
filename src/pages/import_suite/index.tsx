@@ -4,7 +4,6 @@ import { ColumnMapper } from "../../components/import_suite/columnmapper";
 import { ImportStatus } from "../../components/types";
 import type { Transaction } from "../../components/types";
 import { DataContext } from "../../components/data_context";
-import { CategoryMapper } from "../../components/import_suite/new_cat_mapper";
 
 import { useRouter } from "next/router";
 export default function ImportSuite() {
@@ -13,7 +12,14 @@ export default function ImportSuite() {
   const [imported_data, setImportedData] = useState<Record<string, string>[]>(
     [],
   );
-  const [columnised_data, setColumnisedData] = useState<Transaction[]>([]);
+  const [columnised_data, setColumnisedData] = useState<
+    {
+      date: Date;
+      receiver: string;
+      usage: string;
+      amount: number;
+    }[]
+  >([]);
   const [mapped_data, setMappedData] = useState<Transaction[]>([]);
 
   const [transactions, setTransactions] = useState<
@@ -43,7 +49,7 @@ export default function ImportSuite() {
     }
   }, [transactions]);
   // get the DataContext from the app
-  const { data, updateData: setData } = useContext(DataContext);
+  const { handleCreateManyTransactions } = useContext(DataContext);
 
   switch (importState) {
     case ImportStatus.FILEUPLOAD:
@@ -70,37 +76,23 @@ export default function ImportSuite() {
       return (
         <ColumnMapper
           data={imported_data}
-          onBack={() => setImportState(ImportStatus.FILEUPLOAD)}
+          onBack={() => setImportState(ImportStatus.COMPLETE)}
           onNext={(columnised_data) => {
-            setImportState(ImportStatus.CATEGORYMAPPING);
+            setImportState(ImportStatus.COMPLETE);
             setColumnisedData(columnised_data);
           }}
         />
       );
-    case ImportStatus.CATEGORYMAPPING:
-      return (
-        <CategoryMapper
-          data={columnised_data}
-          onBack={() => setImportState(ImportStatus.COLUMNMAPPING)}
-          onNext={(mapped_data) => {
-            setMappedData(mapped_data);
-            setImportState(ImportStatus.COMPLETE);
-          }}
-        />
-      );
     case ImportStatus.COMPLETE:
-      //append the new data to the existing data
-      if (data === null) {
-        setData(mapped_data);
-      } else {
-        setData([...data, ...mapped_data]);
-      }
-      //setting data
-      void router.push("/");
-      //reset all the states
-      setImportedData([]);
-      setColumnisedData([]);
-      setMappedData([]);
-      setImportState(ImportStatus.FILEUPLOAD);
+      handleCreateManyTransactions(columnised_data)
+        .then(() => {
+          void router.push("/");
+
+          setImportedData([]);
+          setColumnisedData([]);
+          setMappedData([]);
+          setImportState(ImportStatus.FILEUPLOAD);
+        })
+        .catch((e) => console.error(e));
   }
 }

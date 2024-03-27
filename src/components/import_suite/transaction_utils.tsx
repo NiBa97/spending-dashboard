@@ -1,34 +1,7 @@
-import type { Mapping, Transaction } from "../types";
+import type { Transaction } from "../types";
 import _, { update } from "lodash";
 import { api } from "~/utils/api";
 
-export function apply_existing_mappings(
-  data: Record<string, Transaction[]>,
-  all_mappings: Mapping[],
-) {
-  //check if all mappings data is available
-  if (data === undefined || all_mappings === undefined) {
-    return data;
-  }
-
-  //iterate through each transaction in the current group
-  //check if its hash value as an assigned category, if so, set it
-  // data contains the grouped transactions
-  //iterate through all groups and each transaction in that group
-  //iterate ofver all keys inside the data dict
-  Object.keys(data).forEach((key) => {
-    data[key]!.forEach((transaction: Transaction) => {
-      const mapping = all_mappings.find(
-        (mapping) => mapping.hash === transaction.Hash,
-      );
-
-      if (mapping) {
-        transaction.Category = mapping.category;
-      }
-    });
-  });
-  return data;
-}
 export function groupAndSortTransactions(
   transactions: Transaction[],
   minCount: number,
@@ -82,31 +55,18 @@ export function get_next_group(
 }
 
 export function useUpdateTransactions() {
-  const { mutate: mapping } =
-    api.transactionCategoryMapping.upsert.useMutation();
   const { mutate: transaction } = api.transactions.createMany.useMutation();
 
-  function updateTransactions(transactions: Transaction[]) {
-    transaction(
+  function updateTransactions(transactions: Transaction[]): Transaction[] {
+    return transaction(
       transactions.map((transaction) => ({
-        date: transaction.Date,
-        hash: transaction.Hash,
-        categoryId: transaction.Category ? transaction.Category.id : "",
-        receiver: transaction.Receiver,
-        usage: transaction.Usage,
-        amount: transaction.Amount,
+        date: transaction.date,
+        categoryId: transaction.category ? transaction.category.id : "",
+        receiver: transaction.receiver,
+        usage: transaction.usage,
+        amount: transaction.amount,
       })),
-    );
-    return;
-    transactions.forEach((transaction) => {
-      //check if the transaction has a category
-      const hash = transaction.Hash;
-
-      mapping({
-        hash: hash,
-        categoryID: transaction.Category!.id,
-      });
-    });
+    )! as Transaction[];
   }
   return updateTransactions;
 }
