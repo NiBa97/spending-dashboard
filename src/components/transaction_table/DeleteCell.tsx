@@ -2,6 +2,7 @@ import type { Row, Table, TableMeta } from "@tanstack/react-table";
 import { FaTrashAlt } from "react-icons/fa";
 import type { Transaction } from "../types";
 import { Button } from "@chakra-ui/react";
+
 interface CustomTableMeta extends TableMeta<Transaction> {
   deleteRow: (rowIndex: number) => void;
 }
