@@ -68,13 +68,13 @@ export const transactionsRouter = createTRPCRouter({
     return createdTransactions;
     }),
     update: protectedProcedure
-    .input(z.object({id:z.string().length(30), data: z.object({
+    .input(z.object({id:z.string(), data: z.object({
       receiver: z.string().min(1).optional(),
       usage: z.string().min(1).optional(),
       amount: z.number().optional(),
       date: z.date().optional(),
-      categoryId: z.string().optional(),
     })})).mutation(async ({ ctx, input }) => {
+      console.log(input);
       return ctx.db.transaction.update({
         where: {
           id: input.id,
@@ -85,15 +85,30 @@ export const transactionsRouter = createTRPCRouter({
           usage: input.data.usage,
           amount: input.data.amount,
           date: input.data.date,
+        },
+      });
+    }),
+    updateCategory: protectedProcedure
+    .input(z.object({id:z.string(), 
+      category: z.object({id: z.string(), name:z.string(), color: z.string()}),
+    })).mutation(async ({ ctx, input }) => {
+      console.log(input);
+      return ctx.db.transaction.update({
+        where: {
+          id: input.id,
+          userId: ctx.session.user.id,
+        },
+        data: {
           category: {
             connect: {
-              id: input.data.categoryId,
+              id: input.category.id,
+              userId: ctx.session.user.id,
             },
           },
         },
       });
     }),
-  delete: protectedProcedure.input(z.string().length(30)).mutation(async ({ ctx, input }) => {
+  delete: protectedProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
     return ctx.db.transaction.delete({
       where: {
         id: input,
@@ -101,7 +116,7 @@ export const transactionsRouter = createTRPCRouter({
       },
     });
   }),
-  get: protectedProcedure.input(z.string().length(30)).query(async ({ ctx, input }) => {
+  get: protectedProcedure.input(z.string()).query(async ({ ctx, input }) => {
     return ctx.db.transaction.findUnique({
       where: {
         id: input,

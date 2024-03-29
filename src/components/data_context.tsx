@@ -1,6 +1,7 @@
 import { createContext, useEffect, useState } from "react";
 import { Category, Transaction } from "./types";
 import { api } from "~/utils/api";
+import { set } from "lodash";
 interface DataContextProps {
   data: Transaction[] | null;
   handleUpdateTransaction: (
@@ -17,6 +18,10 @@ interface DataContextProps {
     }[],
   ) => Promise<void>;
   handleDeleteTransaction: (id: string) => Promise<void>;
+  handleUpdateTransactionCategory: (
+    id: string,
+    category: Category,
+  ) => Promise<void>;
   categories: Category[] | null;
 }
 
@@ -36,6 +41,7 @@ export const DataContext = createContext<DataContextProps>({
     }[],
   ) => {}, // eslint-disable-line @typescript-eslint/no-empty-function
   handleDeleteTransaction: async (id: string) => {}, // eslint-disable-line @typescript-eslint/no-empty-function
+  handleUpdateTransactionCategory: async (id: string, category: Category) => {}, // eslint-disable-line @typescript-eslint/no-empty-function
   categories: null,
 });
 
@@ -126,6 +132,25 @@ export function TransactionProvider({
     updateMutation({ id, data: updatedFields });
   };
 
+  const { mutate: updateCategoryMutation } =
+    api.transactions.updateCategory.useMutation();
+  const handleUpdateTransactionCategory = async (
+    id: string,
+    category: Category,
+  ) => {
+    updateCategoryMutation({ id, category: category });
+    //setData
+    setData((prevData) => {
+      if (!prevData) return prevData;
+      const updatedData = [...prevData];
+      const index = updatedData.findIndex(
+        (transaction) => transaction.id === id,
+      );
+      if (index === -1) return prevData;
+      set(updatedData, `${index}.category`, category);
+      return updatedData;
+    });
+  };
   return (
     <DataContext.Provider
       value={{
@@ -134,6 +159,7 @@ export function TransactionProvider({
         handleCreateTransaction: handleCreateTransaction,
         handleCreateManyTransactions: handleCreateManyTransactions,
         handleDeleteTransaction: handleDeleteTransaction,
+        handleUpdateTransactionCategory: handleUpdateTransactionCategory,
         categories: categories ?? null,
       }}
     >
