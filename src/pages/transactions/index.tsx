@@ -122,13 +122,25 @@ const TransactionTablePage = () => {
       updateCategory: (rowIndex: number, value: Category) => {
         if (data[rowIndex] === undefined) return;
         data[rowIndex]!.category = value;
-        handleUpdateTransactionCategory(data[rowIndex]!.id, value);
+        handleUpdateTransactionCategory(data[rowIndex]!.id, value)
+          .then(() => {
+            console.log("Category updated");
+          })
+          .catch((e) => {
+            console.error(e);
+          });
       },
       deleteRow: (rowIndex: number) => {
         data.splice(rowIndex, 1);
         const transaction = data[rowIndex];
         if (!transaction) return;
-        handleDeleteTransaction(transaction.id);
+        handleDeleteTransaction(transaction.id)
+          .then(() => {
+            console.log("Transaction deleted");
+          })
+          .catch((e) => {
+            console.error(e);
+          });
       },
     },
   });
