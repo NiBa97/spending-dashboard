@@ -132,13 +132,14 @@ export function TransactionProvider({
     updateMutation({ id, data: updatedFields });
   };
 
-  const { mutate: updateCategoryMutation } =
+  const { mutateAsync: updateCategoryMutation } =
     api.transactions.updateCategory.useMutation();
   const handleUpdateTransactionCategory = async (
     id: string,
     category: Category,
   ) => {
-    updateCategoryMutation({ id, category: category });
+    const result = await updateCategoryMutation({ id, category: category });
+    console.log("REsult", result);
     //setData
     setData((prevData) => {
       if (!prevData) return prevData;

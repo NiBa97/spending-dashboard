@@ -27,7 +27,7 @@ import { type FieldValues, useForm } from "react-hook-form";
 import { DataContext } from "./data_context";
 
 import { SketchPicker } from "react-color";
-const CategoryDisplay = ({ category }: { category: Category }) => {
+export const CategoryDisplay = ({ category }: { category: Category }) => {
   return (
     <Flex key={category.id} justifyItems={"center"} alignItems={"center"}>
       <Box
