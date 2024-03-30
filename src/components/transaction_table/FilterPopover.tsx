@@ -18,6 +18,7 @@ import ColorIcon from "./CategoryCell";
 import { Category } from "../types";
 import { useContext } from "react";
 import { DataContext } from "../data_context";
+import { CategoryDisplay } from "../categorySelector";
 const static_categories = ["Food", "Transport", "Entertainment", "Other"];
 
 interface CategoryItemProps {
@@ -37,23 +38,33 @@ const CategoryItem = ({
     borderRadius={5}
     fontWeight="bold"
     p={1.5}
-    bg={isActive ? "gray.800" : "transparent"}
+    border={isActive ? "2px solid" : "2px solid transparent"}
+    bg={"transparent"}
     _hover={{
-      bg: "gray.800",
+      border: "2px solid",
     }}
     onClick={() => {
       setColumnFilters((prev) => {
-        const category_filters = prev.find((filter) => filter.id === "Category")
+        if (prev.length == 0) {
+          console.log("return early");
+          return [
+            {
+              id: "category",
+              value: [category.id],
+            },
+          ];
+        }
+        const category_filters = prev.find((filter) => filter.id === "category")
           ?.value;
         if (!category_filters) {
           return prev.concat({
-            id: "Category",
+            id: "category",
             value: [category.id],
           });
         }
 
         return prev.map((f) =>
-          f.id === "Category"
+          f.id === "category"
             ? {
                 ...f,
                 value: isActive
@@ -62,14 +73,10 @@ const CategoryItem = ({
               }
             : f,
         );
-
-        // If none of the above conditions are met, we return the previous state
-        return prev;
       });
     }}
   >
-    {category.color}
-    {category.name}
+    <CategoryDisplay category={category} />
   </Flex>
 );
 
@@ -87,7 +94,7 @@ const FilterPopover = ({
   setColumnFilters,
 }: FilterPopoverProps) => {
   const filterStatuses =
-    columnFilters.find((f) => f.id === "Category")?.value ?? [];
+    columnFilters.find((f) => f.id === "category")?.value ?? [];
 
   const { categories } = useContext(DataContext);
   return (
@@ -112,6 +119,12 @@ const FilterPopover = ({
             Status
           </Text>
           <VStack align="flex-start" spacing={1}>
+            <CategoryItem
+              category={{ id: "null", name: "Uncategorized", color: "black" }}
+              isActive={filterStatuses.includes("null")}
+              setColumnFilters={setColumnFilters}
+              key={"null"}
+            />
             {categories?.map((category) => (
               <CategoryItem
                 category={category}

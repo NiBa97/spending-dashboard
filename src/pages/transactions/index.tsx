@@ -19,6 +19,8 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
+  RowData,
+  Row,
 } from "@tanstack/react-table";
 import { FaSort } from "react-icons/fa";
 import React from "react";
@@ -28,6 +30,7 @@ import CateogryCell from "~/components/transaction_table/CategoryCell";
 import DeleteCell from "~/components/transaction_table/DeleteCell";
 import Filters from "~/components/transaction_table/Filters";
 import { DataContext } from "~/components/data_context";
+import CategorySelector from "~/components/categorySelector";
 const columnHelper = createColumnHelper<Transaction>();
 const columns = [
   columnHelper.accessor("receiver", {
@@ -50,17 +53,15 @@ const columns = [
         row: props.row,
         category: props.getValue(),
       }),
-    // filterFn: (row, columnId, filterStatuses) => {
-    //   if (filterStatuses.length === 0) return true;
-    //   const status = row.getValue(columnId);
-    //   return filterStatuses.includes(status?.id);
-    // },
-
-    filterFn: (row, columnIds, filterValue) => {
-      if (!Array.isArray(filterValue)) return true;
-      if (filterValue.length === 0) return true;
-      const category: Category = row.getValue("Category");
-      return filterValue.includes(category.id);
+    filterFn: (
+      row: Row<{ category: Category | null }>,
+      columnId: string,
+      filterStatuses: string[],
+    ) => {
+      if (filterStatuses.length === 0) return true;
+      const category: Category | null = row.getValue("category");
+      if (!category) return filterStatuses.includes("null");
+      return filterStatuses.includes(category.id);
     },
   }),
   columnHelper.accessor("date", {
@@ -81,11 +82,17 @@ interface Filter {
   id: string;
   value: string[];
 }
-
+declare module "@tanstack/table-core" {
+  interface TableMeta<TData extends RowData> {
+    updateCategory: (rowIndex: number, value: Category) => void;
+    deleteRow: (rowIndex: number) => void;
+  }
+}
 const TransactionTablePage = () => {
   //use the data context to retrieve all functoins
   const {
     data,
+
     handleUpdateTransaction,
     handleDeleteTransaction,
     handleUpdateTransactionCategory,
@@ -122,13 +129,17 @@ const TransactionTablePage = () => {
       updateCategory: (rowIndex: number, value: Category) => {
         if (data[rowIndex] === undefined) return;
         data[rowIndex]!.category = value;
-        handleUpdateTransactionCategory(data[rowIndex]!.id, value)
-          .then(() => {
-            console.log("Category updated");
-          })
-          .catch((e) => {
-            console.error(e);
-          });
+        try {
+          handleUpdateTransactionCategory(data[rowIndex]!.id, value)
+            .then(() => {
+              console.log("Category updated");
+            })
+            .catch((e) => {
+              console.error(e);
+            });
+        } catch (e) {
+          console.error(e);
+        }
       },
       deleteRow: (rowIndex: number) => {
         data.splice(rowIndex, 1);
@@ -145,8 +156,47 @@ const TransactionTablePage = () => {
     },
   });
 
+  const updateAllFilteredCategories = async (newCategory: Category) => {
+    if (!window.confirm("Are you sure you want to update all categories?")) {
+      return;
+    }
+    // call the update function for each transaction from table meta
+    for (const row of table.getFilteredRowModel().rows) {
+      table.options.meta?.updateCategory(row.index, newCategory);
+    }
+    // const updatePromises = table.getFilteredRowModel().rows.map((row) => {
+    //   const transaction = row.original;
+    //   transaction.category = newCategory;
+    //   return handleUpdateTransactionCategory(transaction.id, newCategory);
+    // });
+
+    // // Wait for all updates to complete
+    // Promise.all(updatePromises)
+    //   .then(() => {
+    //     // Show a toast when all updates are completed
+    //     console.log("All categories updated successfully");
+    //   })
+    //   .catch((e) => {
+    //     console.error(e);
+    //   });
+
+    // // Get the filtered rows
+    // const filteredRows = table.getFilteredRowModel().rows.filter((row) => {
+    //   //
+    //   console.log(row.original);
+    //   table.options.meta?.updateCategory(row.index, newCategory);
+    // });
+    // return;
+  };
+
   return (
     <Box>
+      <CategorySelector
+        selectedCategory={null}
+        onChange={(category) => {
+          void updateAllFilteredCategories(category);
+        }}
+      />
       <Filters
         columnFilters={columnFilters}
         setColumnFilters={setColumnFilters}
