@@ -45,9 +45,12 @@ export const CategoryDisplay = ({ category }: { category: Category }) => {
 export default function CategorySelector({
   selectedCategory,
   onChange,
+  placeholder = "Select Category", // Add this line
 }: {
   selectedCategory: Category | null;
   onChange: (category: Category) => void;
+
+  placeholder?: string; // And this line
 }) {
   const [open, setOpen] = useState(false);
   const { categories } = useContext(DataContext);
@@ -83,7 +86,7 @@ export default function CategorySelector({
           {selectedCategory ? (
             <CategoryDisplay category={selectedCategory} />
           ) : (
-            "Select Category"
+            placeholder
           )}
         </MenuButton>
         <MenuList>
