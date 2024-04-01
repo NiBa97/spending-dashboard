@@ -102,10 +102,10 @@ const FilterPopover = ({
       <PopoverTrigger>
         <Button
           size="sm"
-          color={filterStatuses.length > 0 ? "blue.300" : ""}
           leftIcon={<Icon as={CiFilter as IconType} fontSize={18} />}
         >
-          Filter {filterStatuses.length > 0 ? `(${filterStatuses.length})` : ""}
+          Category Filter{" "}
+          {filterStatuses.length > 0 ? `(${filterStatuses.length})` : ""}
         </Button>
       </PopoverTrigger>
       <PopoverContent>

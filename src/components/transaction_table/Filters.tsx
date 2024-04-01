@@ -26,7 +26,7 @@ const Filters = ({
   setGlobalFilter,
 }: FilterProps) => {
   return (
-    <HStack mb={6} spacing={3}>
+    <HStack spacing={3}>
       <InputGroup size="sm" maxW="12rem">
         <InputLeftElement pointerEvents="none">
           <Icon as={CiSearch as IconType} />
@@ -34,7 +34,7 @@ const Filters = ({
         <Input
           type="text"
           variant="filled"
-          placeholder="Task name"
+          placeholder="Receiver or usage"
           borderRadius={5}
           value={globalFilter}
           onChange={(e) => setGlobalFilter(e.target.value)}

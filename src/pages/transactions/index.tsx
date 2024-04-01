@@ -3,6 +3,8 @@ import {
   Box,
   Button,
   ButtonGroup,
+  Flex,
+  HStack,
   Icon,
   Select,
   Table,
@@ -10,6 +12,7 @@ import {
   Text,
   Th,
   Tr,
+  VStack,
 } from "@chakra-ui/react";
 import {
   createColumnHelper,
@@ -35,18 +38,25 @@ const columnHelper = createColumnHelper<Transaction>();
 const columns = [
   columnHelper.accessor("receiver", {
     header: "Receiver",
+    enableGlobalFilter: true,
     cell: (props) => props.getValue(),
   }),
   columnHelper.accessor("usage", {
     header: "Usage",
+    enableGlobalFilter: true,
     cell: (props) => props.getValue(),
   }),
   columnHelper.accessor("amount", {
     header: "Amount",
+    size: 5,
+    minSize: 5,
     cell: (props) => props.getValue(),
   }),
   columnHelper.accessor("category", {
     header: "Category",
+    size: 5,
+    minSize: 5,
+    maxSize: 5,
     cell: (props) =>
       CateogryCell({
         table: props.table,
@@ -66,6 +76,9 @@ const columns = [
   }),
   columnHelper.accessor("date", {
     header: "Date",
+    size: 5,
+    minSize: 5,
+    maxSize: 5,
     cell: (props) =>
       props.getValue().toLocaleDateString(undefined, {
         year: "numeric",
@@ -75,6 +88,10 @@ const columns = [
   }),
   columnHelper.display({
     id: "Delete",
+    size: 1,
+    minSize: 1,
+    maxSize: 12,
+    enableResizing: false,
     cell: (props) => DeleteCell({ row: props.row, table: props.table }),
   }),
 ];
@@ -157,7 +174,13 @@ const TransactionTablePage = () => {
   });
 
   const updateAllFilteredCategories = async (newCategory: Category) => {
-    if (!window.confirm("Are you sure you want to update all categories?")) {
+    if (
+      !window.confirm(
+        `Are you sure you want to update the category of ${
+          table.getFilteredRowModel().rows.length
+        } transactions?`,
+      )
+    ) {
       return;
     }
     // call the update function for each transaction from table meta
@@ -191,18 +214,26 @@ const TransactionTablePage = () => {
 
   return (
     <Box>
-      <CategorySelector
-        selectedCategory={null}
-        onChange={(category) => {
-          void updateAllFilteredCategories(category);
-        }}
-      />
-      <Filters
-        columnFilters={columnFilters}
-        setColumnFilters={setColumnFilters}
-        globalFilter={globalFilter}
-        setGlobalFilter={setGlobalFilter}
-      />
+      <Flex
+        alignItems={"center"}
+        justifyContent={"space-between"}
+        px={6}
+        py={2}
+      >
+        <Filters
+          columnFilters={columnFilters}
+          setColumnFilters={setColumnFilters}
+          globalFilter={globalFilter}
+          setGlobalFilter={setGlobalFilter}
+        />
+        <CategorySelector
+          placeholder="Update categories in selection"
+          selectedCategory={null}
+          onChange={(category) => {
+            void updateAllFilteredCategories(category);
+          }}
+        />
+      </Flex>
       <Table className="w-full">
         {table.getHeaderGroups().map((headerGroup) => (
           <Tr className="tr" key={headerGroup.id}>
@@ -251,39 +282,47 @@ const TransactionTablePage = () => {
         ))}
       </Table>
       <br />
-      <Text mb={2}>
-        Page {table.getState().pagination.pageIndex + 1} of{" "}
-        {table.getPageCount()}
-      </Text>
-      <ButtonGroup size="sm" isAttached variant="outline">
-        <Button
-          onClick={() => table.previousPage()}
-          isDisabled={!table.getCanPreviousPage()}
-        >
-          {"<"}
-        </Button>
-        <Button
-          onClick={() => table.nextPage()}
-          isDisabled={!table.getCanNextPage()}
-        >
-          {">"}
-        </Button>
-      </ButtonGroup>
-      <Text mb={2}>
-        Current rows: {table.getFilteredRowModel().rows?.length ?? 0}
-      </Text>
-      <Text mb={2}>
-        Rows per page:
-        <Select
-          defaultValue={10}
-          onChange={(e) => table.setPageSize(parseInt(e.target.value))}
-        >
-          <option value={10}>10</option>
-          <option value={25}>25</option>
-          <option value={50}>50</option>
-          <option value={100}>100</option>
-        </Select>
-      </Text>
+      <Flex
+        width={"100%"}
+        justifyContent={"space-between"}
+        px={6}
+        alignItems={"center"}
+      >
+        <Text>
+          Page {table.getState().pagination.pageIndex + 1} of{" "}
+          {table.getPageCount()}
+          <br />
+          Current rows: {table.getFilteredRowModel().rows?.length ?? 0}
+        </Text>
+        <ButtonGroup size="sm" isAttached variant="outline">
+          <Button
+            onClick={() => table.previousPage()}
+            isDisabled={!table.getCanPreviousPage()}
+          >
+            {"<"} Previous
+          </Button>
+          <Button
+            onClick={() => table.nextPage()}
+            isDisabled={!table.getCanNextPage()}
+          >
+            Next {">"}
+          </Button>
+        </ButtonGroup>
+
+        <HStack spacing={2} mb={2}>
+          <Box>Rows per page:</Box>
+          <Select
+            w={20}
+            defaultValue={10}
+            onChange={(e) => table.setPageSize(parseInt(e.target.value))}
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+          </Select>
+        </HStack>
+      </Flex>
     </Box>
   );
 };
