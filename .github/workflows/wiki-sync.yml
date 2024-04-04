@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - 'wiki/**'
-
+  workflow_dispatch:
 jobs:
   sync:
     runs-on: ubuntu-latest
@@ -21,8 +21,8 @@ jobs:
           git clone https://github.com/${{ github.repository }}.wiki.git
           rsync -a --delete wiki/ ./${{ github.repository }}.wiki/
           cd ./${{ github.repository }}.wiki
-          git config user.name Wiki-Bot
-          git config user.email wiki-bot@users.noreply.github.com
+          git config user.name WikiBot
+          git config user.email wiki_bot@users.noreply.github.com
           git add .
           git commit -m "docs: Update wiki" || echo "No changes to commit"
           git push
