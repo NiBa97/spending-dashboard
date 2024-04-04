@@ -1,0 +1,30 @@
+name: Sync Wiki
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'wiki/**'
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Push to wiki
+        run: |
+          git clone https://github.com/${{ github.repository }}.wiki.git
+          rsync -a --delete wiki/ ./${{ github.repository }}.wiki/
+          cd ./${{ github.repository }}.wiki
+          git config user.name Wiki-Bot
+          git config user.email wiki-bot@users.noreply.github.com
+          git add .
+          git commit -m "docs: Update wiki" || echo "No changes to commit"
+          git push
+        env:
+          GH_TOKEN: ${{ secrets.WIKI_TOKEN }}
