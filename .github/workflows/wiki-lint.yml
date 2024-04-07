@@ -1,0 +1,19 @@
+name: Lint Markdown
+
+on:
+  pull_request:
+    paths:
+      - 'wiki/**'
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Markdown lint
+        uses: DavidAnson/markdownlint-cli2-action@v15
+        with:
+          globs: 'wiki/**/*.md'
