@@ -26,6 +26,9 @@ const Navbar = () => {
           <Link className={linkClass("/transactions")} href="/transactions">
             Transactions
           </Link>
+          <Link className={linkClass("/insights")} href="/insights">
+            Insights
+          </Link>
           <Link
             className={linkClass("/api/auth/signin")}
             href="/api/auth/signin"
