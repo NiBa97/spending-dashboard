@@ -1,6 +1,16 @@
 //Create a new page
 
-import { Box, MenuItem, Select, Text } from "@chakra-ui/react";
+import {
+  Box,
+  MenuItem,
+  RangeSlider,
+  RangeSliderFilledTrack,
+  RangeSliderThumb,
+  RangeSliderTrack,
+  Select,
+  SliderMark,
+  Text,
+} from "@chakra-ui/react";
 import { useContext, useEffect, useState } from "react";
 import { DataContext } from "~/components/data_context";
 import { Transaction } from "~/components/types";
@@ -179,14 +189,68 @@ const NegativeTransactionsPerInterval = ({
 const InsightsPage = () => {
   //get the data from the context
   const { data } = useContext(DataContext);
-
   if (!data) {
     return <div>Loading...</div>;
   }
 
+  const oldestTransaction = data.reduce((acc, transaction) => {
+    if (!acc || transaction.date < acc.date) {
+      return transaction;
+    }
+    return acc;
+  });
+
+  const newestTransaction = data.reduce((acc, transaction) => {
+    if (!acc || transaction.date > acc.date) {
+      return transaction;
+    }
+    return acc;
+  });
+
+  const [rangeValue, setRangeValue] = useState([
+    //find the first date in the data, but keep in mind that the data is not sorted
+    oldestTransaction.date.getTime(),
+    newestTransaction.date.getTime(),
+  ]);
+  console.log("range", rangeValue);
   return (
     <div>
       Insights Page
+      <Box
+        border={"solid 1px black"}
+        borderRadius={5}
+        paddingY={30}
+        paddingX={30}
+      >
+        <RangeSlider
+          aria-label={["min", "max"]}
+          min={oldestTransaction.date.getTime()}
+          max={newestTransaction.date.getTime()}
+          defaultValue={rangeValue}
+          onChangeEnd={(val) => setRangeValue(val)}
+          datatype="date"
+        >
+          <Box position={"absolute"} left={"0"} top={25}>
+            {oldestTransaction.date.toLocaleDateString()} old
+          </Box>
+          <RangeSliderTrack>
+            <RangeSliderFilledTrack />
+          </RangeSliderTrack>
+          <RangeSliderThumb index={0}>
+            <Text marginTop={-50} align={"right"}>
+              {new Date(rangeValue[0]!).toLocaleDateString()}
+            </Text>
+          </RangeSliderThumb>
+          <RangeSliderThumb index={1}>
+            <Text marginTop={-50}>
+              {new Date(rangeValue[1]!).toLocaleDateString()}
+            </Text>
+          </RangeSliderThumb>
+          <Box right={0} position={"absolute"} top={25}>
+            {newestTransaction.date.toLocaleDateString()} new
+          </Box>
+        </RangeSlider>
+      </Box>
       <TotalSpendings transactions={data} />
       <TotalEarnings transactions={data} />
       <TotalTransactions transactions={data} />
