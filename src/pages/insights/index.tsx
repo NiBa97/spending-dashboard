@@ -1,10 +1,11 @@
 //Create a new page
 
-import { Box, MenuItem, Select } from "@chakra-ui/react";
+import { Box, MenuItem, Select, Text } from "@chakra-ui/react";
 import { useContext, useEffect, useState } from "react";
 import { DataContext } from "~/components/data_context";
 import { Transaction } from "~/components/types";
 import dynamic from "next/dynamic";
+import TransactionTable from "~/components/transaction_table/TransactionTable";
 
 const Plot = dynamic(() => import("react-plotly.js"), { ssr: false });
 
@@ -13,7 +14,7 @@ const TotalSpendings = ({ transactions }: { transactions: Transaction[] }) => {
   const total = transactions
     .filter((transaction) => transaction.amount < 0)
     .reduce((acc, transaction) => acc + transaction.amount, 0);
-  return <Box>Total spendings: {total}</Box>;
+  return <Box>Total spendings: {Math.abs(total)}</Box>;
 };
 
 const TotalEarnings = ({ transactions }: { transactions: Transaction[] }) => {
@@ -22,6 +23,22 @@ const TotalEarnings = ({ transactions }: { transactions: Transaction[] }) => {
     .filter((transaction) => transaction.amount > 0)
     .reduce((acc, transaction) => acc + transaction.amount, 0);
   return <Box>Total earnings: {total}</Box>;
+};
+
+const TotalDiff = ({ transactions }: { transactions: Transaction[] }) => {
+  const total = transactions.reduce(
+    (acc, transaction) => acc + transaction.amount,
+    0,
+  );
+  // Add a green or a red icon infront
+  return (
+    <Box>
+      Total difference{" "}
+      <Text color={total > 0 ? "green" : "white"} fontWeight={"bold"}>
+        {total}
+      </Text>
+    </Box>
+  );
 };
 
 const TotalTransactions = ({
@@ -173,10 +190,13 @@ const InsightsPage = () => {
       <TotalSpendings transactions={data} />
       <TotalEarnings transactions={data} />
       <TotalTransactions transactions={data} />
+      <TotalDiff transactions={data} />
       <h3>Transactions per day</h3>
       <NegativeTransactionsPerInterval transactions={data} />
       <h3>Category Pie Chart</h3>
       <CategoryPieChart transactions={data} />
+      <h3>Table</h3>
+      <TransactionTable data={data} />
     </div>
   );
 };
