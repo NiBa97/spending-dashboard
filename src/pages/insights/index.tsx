@@ -132,7 +132,7 @@ const NegativeTransactionsPerInterval = ({
     }
 
     setSampledTransactions(results);
-  }, [interval]);
+  }, [interval, transactions]);
 
   const traces = sampledTransactions.reduce(
     (
@@ -189,7 +189,8 @@ const NegativeTransactionsPerInterval = ({
 const InsightsPage = () => {
   //get the data from the context
   const { data } = useContext(DataContext);
-  if (!data) {
+  const [dataSelection, setDataSelection] = useState(data);
+  if (!data || !dataSelection) {
     return <div>Loading...</div>;
   }
 
@@ -212,7 +213,19 @@ const InsightsPage = () => {
     oldestTransaction.date.getTime(),
     newestTransaction.date.getTime(),
   ]);
-  console.log("range", rangeValue);
+
+  useEffect(() => {
+    if (rangeValue === undefined) return;
+    //update the data depending on the
+    //range selected by the user
+    const results = data.filter((transaction) => {
+      const date = new Date(transaction.date);
+      return (
+        date.getTime() >= rangeValue[0]! && date.getTime() <= rangeValue[1]!
+      );
+    });
+    setDataSelection(results);
+  }, [rangeValue]);
   return (
     <div>
       Insights Page
@@ -251,16 +264,16 @@ const InsightsPage = () => {
           </Box>
         </RangeSlider>
       </Box>
-      <TotalSpendings transactions={data} />
-      <TotalEarnings transactions={data} />
-      <TotalTransactions transactions={data} />
-      <TotalDiff transactions={data} />
+      <TotalSpendings transactions={dataSelection} />
+      <TotalEarnings transactions={dataSelection} />
+      <TotalTransactions transactions={dataSelection} />
+      <TotalDiff transactions={dataSelection} />
       <h3>Transactions per day</h3>
-      <NegativeTransactionsPerInterval transactions={data} />
+      <NegativeTransactionsPerInterval transactions={dataSelection} />
       <h3>Category Pie Chart</h3>
-      <CategoryPieChart transactions={data} />
+      <CategoryPieChart transactions={dataSelection} />
       <h3>Table</h3>
-      <TransactionTable data={data} />
+      <TransactionTable data={dataSelection} />
     </div>
   );
 };
