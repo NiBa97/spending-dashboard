@@ -9,3 +9,7 @@ import { RouterOutputs } from "~/utils/api";
 export type Category = RouterOutputs["category"]["getAll"][number];
 
 export type Transaction = RouterOutputs["transactions"]["getAll"][number];
+export interface Filter {
+  id: string;
+  value: string[];
+}
