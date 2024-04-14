@@ -12,6 +12,11 @@
     "lint": "next lint",
     "start": "next start"
   },
+  "markdownlint-cli2": {
+    "config": {
+      "MD033": false
+    }
+  },
   "dependencies": {
     "@chakra-ui/react": "^2.8.2",
     "@emotion/react": "^11.11.3",
