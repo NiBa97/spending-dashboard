@@ -1,22 +1,29 @@
-//Create a new page
-
 import {
   Box,
+  Button,
+  Flex,
+  Menu,
+  MenuButton,
   MenuItem,
+  MenuList,
   RangeSlider,
   RangeSliderFilledTrack,
   RangeSliderThumb,
+  RangeSliderThumbProps,
   RangeSliderTrack,
   Select,
-  SliderMark,
+  Spacer,
   Text,
+  useRangeSliderContext,
 } from "@chakra-ui/react";
 import { useContext, useEffect, useState } from "react";
 import { DataContext } from "~/components/data_context";
-import { Transaction } from "~/components/types";
+import { Filter, Transaction } from "~/components/types";
 import dynamic from "next/dynamic";
 import TransactionTable from "~/components/transaction_table/TransactionTable";
-
+import { Heading } from "@chakra-ui/react";
+import { FaChevronDown } from "react-icons/fa";
+import FilterPopover from "~/components/transaction_table/FilterPopover";
 const Plot = dynamic(() => import("react-plotly.js"), { ssr: false });
 
 const TotalSpendings = ({ transactions }: { transactions: Transaction[] }) => {
@@ -44,7 +51,7 @@ const TotalDiff = ({ transactions }: { transactions: Transaction[] }) => {
   return (
     <Box>
       Total difference{" "}
-      <Text color={total > 0 ? "green" : "white"} fontWeight={"bold"}>
+      <Text as="span" color={total > 0 ? "green" : "white"} fontWeight={"bold"}>
         {total}
       </Text>
     </Box>
@@ -114,18 +121,17 @@ const NegativeTransactionsPerInterval = ({
 }: {
   transactions: Transaction[];
 }) => {
-  const [interval, setInterval] = useState("daily");
+  const [interval, setInterval] = useState("day");
   const [sampledTransactions, setSampledTransactions] = useState(transactions);
-  console.log(sampledTransactions);
   useEffect(() => {
     const results = [];
     for (const transaction of transactions) {
       const date = new Date(transaction.date);
       if (transaction.amount > 0) continue; // Skip positive transactions
 
-      if (interval === "weekly") {
+      if (interval === "week") {
         date.setDate(date.getDate() - date.getDay());
-      } else if (interval === "monthly") {
+      } else if (interval === "month") {
         date.setDate(1);
       }
       results.push({ ...transaction, date });
@@ -160,14 +166,23 @@ const NegativeTransactionsPerInterval = ({
 
   return (
     <>
-      <Select
-        value={interval}
-        onChange={(event) => setInterval(event.target.value)}
-      >
-        <option value="daily">Daily</option>
-        <option value="weekly">Weekly</option>
-        <option value="monthly">Monthly</option>
-      </Select>
+      <Menu>
+        <Heading>
+          Transactions per{" "}
+          <MenuButton
+            as={Button}
+            textTransform={"capitalize"}
+            rightIcon={<FaChevronDown />}
+          >
+            {interval}
+          </MenuButton>
+        </Heading>
+        <MenuList>
+          <MenuItem onClick={() => setInterval("day")}>Day</MenuItem>
+          <MenuItem onClick={() => setInterval("week")}>Week</MenuItem>
+          <MenuItem onClick={() => setInterval("month")}>Month</MenuItem>
+        </MenuList>
+      </Menu>
 
       <Plot
         data={Object.values(traces)}
@@ -185,7 +200,33 @@ const NegativeTransactionsPerInterval = ({
     </>
   );
 };
-
+const RangeSliderThumbWithHint = (props: RangeSliderThumbProps) => {
+  const { state } = useRangeSliderContext();
+  return (
+    <RangeSliderThumb {...props}>
+      <Box
+        top={-8}
+        pos="absolute"
+        h={6}
+        minWidth={4}
+        px={2}
+        borderRadius={8}
+        bg="gray.100"
+        border="1px solid"
+        borderColor="gray.200"
+        pointerEvents="none"
+        transition="opacity 200ms ease-out"
+        sx={{
+          ".chakra-slider__thumb:not([data-active]):not(:hover) > &": {
+            opacity: 0,
+          },
+        }}
+      >
+        {new Date(state.value[props.index]!).toLocaleDateString()}
+      </Box>
+    </RangeSliderThumb>
+  );
+};
 const InsightsPage = () => {
   //get the data from the context
   const { data } = useContext(DataContext);
@@ -214,65 +255,92 @@ const InsightsPage = () => {
     newestTransaction.date.getTime(),
   ]);
 
-  useEffect(() => {
-    if (rangeValue === undefined) return;
-    //update the data depending on the
-    //range selected by the user
-    const results = data.filter((transaction) => {
+  const refreshDataSelection = () => {
+    const filterStatuses =
+      columnFilters.find((f) => f.id === "category")?.value ?? [];
+    console.log("Filter", filterStatuses);
+    const result = data.filter((transaction) => {
+      //check if the date is in the range
+      //then check if the category is selected
       const date = new Date(transaction.date);
-      return (
-        date.getTime() >= rangeValue[0]! && date.getTime() <= rangeValue[1]!
-      );
+      const date_fit =
+        rangeValue === undefined ||
+        (date.getTime() >= rangeValue[0]! && date.getTime() <= rangeValue[1]!);
+      const category = transaction.category?.id ?? "null";
+      const category_fit =
+        filterStatuses.length === 0 || filterStatuses.includes(category);
+      return date_fit && category_fit;
     });
-    setDataSelection(results);
-  }, [rangeValue]);
+    setDataSelection(result);
+  };
+
+  const [columnFilters, setColumnFilters] = useState<Filter[]>([]);
+  useEffect(() => {
+    refreshDataSelection();
+  }, [rangeValue, columnFilters]);
+
   return (
     <div>
-      Insights Page
-      <Box
-        border={"solid 1px black"}
-        borderRadius={5}
-        paddingY={30}
-        paddingX={30}
-      >
-        <RangeSlider
-          aria-label={["min", "max"]}
-          min={oldestTransaction.date.getTime()}
-          max={newestTransaction.date.getTime()}
-          defaultValue={rangeValue}
-          onChangeEnd={(val) => setRangeValue(val)}
-          datatype="date"
+      <Heading>Insights Page</Heading>
+      <Flex>
+        <Box>
+          <Text as="span" fontWeight={"bold"}>
+            Date range:{" "}
+          </Text>
+          <Text as="span">{new Date(rangeValue[0]!).toLocaleDateString()}</Text>{" "}
+          -{" "}
+          <Text as="span">{new Date(rangeValue[1]!).toLocaleDateString()}</Text>
+          <TotalTransactions transactions={dataSelection} />
+          <TotalSpendings transactions={dataSelection} />
+          <TotalEarnings transactions={dataSelection} />
+          <TotalDiff transactions={dataSelection} />
+        </Box>
+        <Spacer></Spacer>
+        <Box
+          border={"solid 1px black"}
+          borderRadius={5}
+          paddingY={30}
+          paddingX={30}
+          w="60%"
         >
-          <Box position={"absolute"} left={"0"} top={25}>
-            {oldestTransaction.date.toLocaleDateString()} old
+          <Box marginBottom={5}>
+            <Text fontWeight={"bold"}>Category filter:</Text>
+            <FilterPopover
+              columnFilters={columnFilters}
+              setColumnFilters={setColumnFilters}
+            />
           </Box>
-          <RangeSliderTrack>
-            <RangeSliderFilledTrack />
-          </RangeSliderTrack>
-          <RangeSliderThumb index={0}>
-            <Text marginTop={-50} align={"right"}>
-              {new Date(rangeValue[0]!).toLocaleDateString()}
-            </Text>
-          </RangeSliderThumb>
-          <RangeSliderThumb index={1}>
-            <Text marginTop={-50}>
-              {new Date(rangeValue[1]!).toLocaleDateString()}
-            </Text>
-          </RangeSliderThumb>
-          <Box right={0} position={"absolute"} top={25}>
-            {newestTransaction.date.toLocaleDateString()} new
-          </Box>
-        </RangeSlider>
-      </Box>
-      <TotalSpendings transactions={dataSelection} />
-      <TotalEarnings transactions={dataSelection} />
-      <TotalTransactions transactions={dataSelection} />
-      <TotalDiff transactions={dataSelection} />
-      <h3>Transactions per day</h3>
+          <Text marginBottom={10} fontWeight={"bold"}>
+            Date range:
+          </Text>
+          <RangeSlider
+            aria-label={["min", "max"]}
+            min={oldestTransaction.date.getTime()}
+            max={newestTransaction.date.getTime()}
+            defaultValue={rangeValue}
+            onChangeEnd={(val) => setRangeValue(val)}
+            datatype="date"
+          >
+            <Box position={"absolute"} left={"0"} top={25}>
+              {oldestTransaction.date.toLocaleDateString()}
+            </Box>
+            <RangeSliderTrack>
+              <RangeSliderFilledTrack />
+            </RangeSliderTrack>
+            <RangeSliderThumbWithHint index={0}>
+              <Text marginTop={-50} align={"right"}></Text>
+            </RangeSliderThumbWithHint>
+            <RangeSliderThumbWithHint index={1}></RangeSliderThumbWithHint>
+            <Box right={0} position={"absolute"} top={25}>
+              {newestTransaction.date.toLocaleDateString()}
+            </Box>
+          </RangeSlider>
+        </Box>
+      </Flex>
       <NegativeTransactionsPerInterval transactions={dataSelection} />
-      <h3>Category Pie Chart</h3>
+      <Heading>Category Pie Chart</Heading>
       <CategoryPieChart transactions={dataSelection} />
-      <h3>Table</h3>
+      <Heading>Table</Heading>
       <TransactionTable data={dataSelection} />
     </div>
   );

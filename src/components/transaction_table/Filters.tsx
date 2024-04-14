@@ -7,11 +7,8 @@ import {
 } from "@chakra-ui/react";
 import FilterPopover from "./FilterPopover";
 import { CiSearch } from "react-icons/ci";
-interface Filter {
-  id: string;
-  value: string[];
-}
 import { IconType } from "react-icons";
+import { Filter } from "../types";
 
 interface FilterProps {
   columnFilters: Filter[];

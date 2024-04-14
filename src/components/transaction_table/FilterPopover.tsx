@@ -15,7 +15,7 @@ import { CiFilter } from "react-icons/ci";
 import { IconType } from "react-icons";
 
 import ColorIcon from "./CategoryCell";
-import { Category } from "../types";
+import { Category, Filter } from "../types";
 import { useContext } from "react";
 import { DataContext } from "../data_context";
 import { CategoryDisplay } from "../categorySelector";
@@ -79,11 +79,6 @@ const CategoryItem = ({
     <CategoryDisplay category={category} />
   </Flex>
 );
-
-interface Filter {
-  id: string;
-  value: string[];
-}
 
 interface FilterPopoverProps {
   columnFilters: Filter[];
