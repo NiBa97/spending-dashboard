@@ -1,6 +1,7 @@
 # User Stories
 
-This is a collection of user stories. It's meant to be flexible over time; accordingly, the list below is not ordered.
+This is a collection of user stories.
+It's meant to be flexible over time; accordingly, the list below is not ordered.
 
 ## Analyze
 
