@@ -108,6 +108,21 @@ export const transactionsRouter = createTRPCRouter({
         },
       });
     }),
+    removeTransactionCategory: protectedProcedure.input(z.object({id:z.string()})).mutation(async ({ ctx, input }) => {
+      console.log(input);
+      return ctx.db.transaction.update({
+        where: {
+          id: input.id,
+          userId: ctx.session.user.id,
+        },
+        data: {
+          category: {
+            disconnect: true,
+          },
+        },
+      });
+}),
+    
   delete: protectedProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
     return ctx.db.transaction.delete({
       where: {

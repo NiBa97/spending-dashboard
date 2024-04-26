@@ -100,7 +100,7 @@ interface Filter {
 }
 declare module "@tanstack/table-core" {
   interface TableMeta<TData extends RowData> {
-    updateCategory: (rowIndex: number, value: Category) => void;
+    updateCategory: (rowIndex: number, value: Category | null) => void;
     deleteRow: (rowIndex: number) => void;
   }
 }
@@ -110,10 +110,10 @@ function TransactionTable({
   handleUpdateTransactionCategory,
 }: {
   data: Transaction[];
-  handleDeleteTransaction?: (id: string) => Promise<void>;
-  handleUpdateTransactionCategory?: (
+  handleDeleteTransaction: (id: string) => Promise<void>;
+  handleUpdateTransactionCategory: (
     id: string,
-    category: Category,
+    category: Category | null,
   ) => Promise<void>;
 }) {
   const [columnFilters, setColumnFilters] = useState<Filter[]>([]);
@@ -145,12 +145,8 @@ function TransactionTable({
     autoResetPageIndex: false, //turn off auto reset of pageIndex
     columnResizeMode: "onChange",
     meta: {
-      updateCategory: (rowIndex: number, value: Category) => {
+      updateCategory: (rowIndex: number, value: Category | null) => {
         if (data[rowIndex] === undefined) return;
-        if (handleUpdateTransactionCategory === undefined) {
-          alert("No handleUpdateTransactionCategory provided");
-          return;
-        }
         data[rowIndex]!.category = value;
         try {
           handleUpdateTransactionCategory(data[rowIndex]!.id, value)
@@ -183,7 +179,7 @@ function TransactionTable({
     },
   });
 
-  const updateAllFilteredCategories = async (newCategory: Category) => {
+  const updateAllFilteredCategories = async (newCategory: Category | null) => {
     if (
       !window.confirm(
         `Are you sure you want to update the category of ${

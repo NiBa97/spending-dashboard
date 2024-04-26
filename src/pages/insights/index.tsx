@@ -278,7 +278,8 @@ const InsightsPage = () => {
   useEffect(() => {
     refreshDataSelection();
   }, [rangeValue, columnFilters]);
-
+  const { handleDeleteTransaction, handleUpdateTransactionCategory } =
+    useContext(DataContext);
   return (
     <div>
       <Heading>Insights Page</Heading>
@@ -341,7 +342,17 @@ const InsightsPage = () => {
       <Heading>Category Pie Chart</Heading>
       <CategoryPieChart transactions={dataSelection} />
       <Heading>Table</Heading>
-      <TransactionTable data={dataSelection} />
+      <TransactionTable
+        data={dataSelection}
+        handleDeleteTransaction={async (id) => {
+          await handleDeleteTransaction(id);
+          refreshDataSelection();
+        }}
+        handleUpdateTransactionCategory={async (id, category) => {
+          await handleUpdateTransactionCategory(id, category);
+          refreshDataSelection();
+        }}
+      />
     </div>
   );
 };

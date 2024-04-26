@@ -48,7 +48,7 @@ export default function CategorySelector({
   placeholder = "Select Category", // Add this line
 }: {
   selectedCategory: Category | null;
-  onChange: (category: Category) => void;
+  onChange: (category: Category | null) => void;
 
   placeholder?: string; // And this line
 }) {
@@ -57,7 +57,6 @@ export default function CategorySelector({
 
   const { mutate } = api.category.create.useMutation();
   const [color, setColor] = useState("");
-
   const { register, handleSubmit, reset } = useForm();
   const utils = api.useUtils();
   const onSubmit = (data: FieldValues) => {
@@ -90,6 +89,11 @@ export default function CategorySelector({
           )}
         </MenuButton>
         <MenuList>
+          <MenuItem onClick={() => onChange(null)}>
+            <CategoryDisplay
+              category={{ id: "null", name: "Uncategorized", color: "white" }}
+            />
+          </MenuItem>
           {categories?.map((category) => (
             <MenuItem onClick={() => onChange(category)} key={category.id}>
               <CategoryDisplay category={category} />
