@@ -2,7 +2,7 @@ import CategorySelector from "../categorySelector";
 import { Row, TableMeta, Table } from "@tanstack/react-table";
 import { Category, Transaction } from "../types";
 interface CustomTableMeta extends TableMeta<Category> {
-  updateCategory: (rowIndex: number, value: object) => void;
+  updateCategory: (rowIndex: number, value: object | null) => void;
 }
 const CateogryCell = ({
   row,
@@ -19,7 +19,9 @@ const CateogryCell = ({
   return (
     <CategorySelector
       selectedCategory={category}
-      onChange={(category: Category) => updateCategory(row.index, category)}
+      onChange={(category: Category | null) =>
+        updateCategory(row.index, category)
+      }
     />
   );
 };

@@ -20,7 +20,7 @@ interface DataContextProps {
   handleDeleteTransaction: (id: string) => Promise<void>;
   handleUpdateTransactionCategory: (
     id: string,
-    category: Category,
+    category: Category | null,
   ) => Promise<void>;
   categories: Category[] | null;
 }
@@ -41,7 +41,10 @@ export const DataContext = createContext<DataContextProps>({
     }[],
   ) => {}, // eslint-disable-line @typescript-eslint/no-empty-function
   handleDeleteTransaction: async (id: string) => {}, // eslint-disable-line @typescript-eslint/no-empty-function
-  handleUpdateTransactionCategory: async (id: string, category: Category) => {}, // eslint-disable-line @typescript-eslint/no-empty-function
+  handleUpdateTransactionCategory: async (
+    id: string,
+    category: Category | null,
+  ) => {}, // eslint-disable-line @typescript-eslint/no-empty-function
   categories: null,
 });
 
@@ -134,12 +137,18 @@ export function TransactionProvider({
 
   const { mutateAsync: updateCategoryMutation } =
     api.transactions.updateCategory.useMutation();
+
+  const { mutateAsync: removeCategoryMutation } =
+    api.transactions.removeTransactionCategory.useMutation();
   const handleUpdateTransactionCategory = async (
     id: string,
-    category: Category,
+    category: Category | null,
   ) => {
-    const result = await updateCategoryMutation({ id, category: category });
-    console.log("REsult", result);
+    if (category === null) {
+      await removeCategoryMutation({ id });
+    } else {
+      await updateCategoryMutation({ id, category: category });
+    }
     //setData
     setData((prevData) => {
       if (!prevData) return prevData;

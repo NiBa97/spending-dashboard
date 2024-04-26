@@ -37,7 +37,7 @@ export default function Home() {
 
       <CategorySelector
         selectedCategory={selectedCategory}
-        onChange={(category: Category) => setSelectedCategory(category)}
+        onChange={(category: Category | null) => setSelectedCategory(category)}
       />
 
       <ImportSuite />
