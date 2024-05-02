@@ -4,6 +4,7 @@ import { useState } from "react";
 import CategorySelector from "~/components/categorySelector";
 import type { Category } from "~/components/types";
 import ImportSuite from "./import_suite";
+import { ExportCategories, ExportTransactions } from "~/components/export";
 
 const MetaSidebar = () => {
   return (
@@ -14,6 +15,8 @@ const MetaSidebar = () => {
           <h3 className="text-lg font-bold">Transaction Category Mappings</h3>
         </div>
       </div>{" "}
+      <ExportTransactions></ExportTransactions>
+      <ExportCategories></ExportCategories>
     </>
   );
 };
