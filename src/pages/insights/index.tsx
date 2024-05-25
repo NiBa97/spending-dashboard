@@ -140,29 +140,9 @@ const NegativeTransactionsPerInterval = ({
     setSampledTransactions(results);
   }, [interval, transactions]);
 
-  const traces = sampledTransactions.reduce(
-    (
-      acc: Record<
-        string,
-        { x: Date[]; y: number[]; type: "bar"; name: string }
-      >,
-      transaction,
-    ) => {
-      const category = transaction.category?.name ?? "No category";
-      const { x = [], y = [] } = acc[category] ?? {};
+  const traces = transactions_to_traces(sampledTransactions);
 
-      return {
-        ...acc,
-        [category]: {
-          x: [...x, transaction.date],
-          y: [...y, transaction.amount * -1],
-          type: "bar" as const,
-          name: category,
-        },
-      };
-    },
-    {},
-  );
+  //for each date and category, group all the transaction amounts on the traces
 
   return (
     <>
@@ -357,3 +337,49 @@ const InsightsPage = () => {
   );
 };
 export default InsightsPage;
+function transactions_to_traces(
+  sampledTransactions: {
+    category: { name: string; color: string; id: string } | null;
+    date: Date;
+    id: string;
+    receiver: string;
+    usage: string;
+    amount: number;
+  }[],
+): {
+  x: Date[];
+  y: number[];
+  type: "bar";
+  name: string;
+}[] {
+  const traces_data = sampledTransactions.reduce(
+    (acc: Record<string, Record<string, number>>, transaction) => {
+      const category = transaction.category?.name ?? "No category";
+      const dateStr = transaction.date.toISOString().split("T")[0];
+
+      if (!acc[category]) {
+        acc[category] = {};
+      }
+      if (!acc[category]![transaction.date.toISOString()]) {
+        acc[category]![transaction.date.toISOString()] = 0;
+      }
+
+      acc[category]![transaction.date.toISOString()] += transaction.amount * -1;
+
+      return acc;
+    },
+    {},
+  );
+
+  const traces = Object.entries(traces_data).map(([category, dates]) => {
+    const x = Object.keys(dates).map((date) => new Date(date));
+    const y = Object.values(dates);
+    return {
+      x,
+      y,
+      type: "bar" as const,
+      name: category,
+    };
+  });
+  return traces;
+}
