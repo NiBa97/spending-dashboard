@@ -12,6 +12,7 @@ import {
   RangeSliderThumbProps,
   RangeSliderTrack,
   Select,
+  SimpleGrid,
   Spacer,
   Text,
   useRangeSliderContext,
@@ -142,7 +143,28 @@ const NegativeTransactionsPerInterval = ({
 
   const traces = transactions_to_traces(sampledTransactions);
 
-  //for each date and category, group all the transaction amounts on the traces
+  //Group transactions by category
+  const categorized_transactions = transactions.reduce(
+    (acc, transaction) => {
+      if (transaction.amount > 0) return acc;
+
+      const category = transaction.category?.name ?? "No category";
+      const amount = Math.abs(transaction.amount);
+      const color = transaction.category?.color ?? "black";
+
+      if (acc[category]) {
+        acc[category]!.amount += amount;
+        acc[category]!.color = color; // Assuming the color of the last transaction is used
+      } else {
+        acc[category] = { amount, color };
+      }
+
+      return acc;
+    },
+    {} as Record<string, { amount: number; color: string }>,
+  );
+
+  console.log(categorized_transactions);
 
   return (
     <>
@@ -177,6 +199,35 @@ const NegativeTransactionsPerInterval = ({
         config={{ displayModeBar: false }}
         style={{ width: "100%", height: "100%" }}
       />
+
+      <SimpleGrid columns={5} gap={4}>
+        {Object.entries(categorized_transactions).map(([category, summary]) => (
+          <Box
+            key={category}
+            bg={summary.color}
+            color="white"
+            p={4}
+            borderRadius="md"
+            textAlign="center"
+            position="relative"
+            minH="50px"
+          >
+            <Text
+              fontSize="sm"
+              bg="rgba(0, 0, 0, 0.5)"
+              borderRadius="md"
+              p={1}
+              top={2}
+              marginBottom={1}
+            >
+              {category}
+            </Text>
+            <Text fontSize="2xl" mt={4}>
+              €{summary.amount.toFixed(2)}
+            </Text>
+          </Box>
+        ))}
+      </SimpleGrid>
     </>
   );
 };
