@@ -346,40 +346,40 @@ function transactions_to_traces(
     usage: string;
     amount: number;
   }[],
-): {
-  x: Date[];
-  y: number[];
-  type: "bar";
-  name: string;
-}[] {
-  const traces_data = sampledTransactions.reduce(
-    (acc: Record<string, Record<string, number>>, transaction) => {
+): Record<string, Trace> {
+  const traces_data: Record<string, Trace> = sampledTransactions.reduce(
+    (trans_traces: Record<string, Trace>, transaction) => {
       const category = transaction.category?.name ?? "No category";
-      const dateStr = transaction.date.toISOString().split("T")[0];
-
-      if (!acc[category]) {
-        acc[category] = {};
+      const date = transaction.date.toISOString();
+      if (!trans_traces[category]) {
+        trans_traces[category] = {
+          x: [],
+          y: [],
+          type: "bar",
+          name: category,
+          marker: { color: transaction.category?.color ?? "black" },
+        };
       }
-      if (!acc[category]![transaction.date.toISOString()]) {
-        acc[category]![transaction.date.toISOString()] = 0;
+
+      //Check if date is already in x array and get the index of the value
+      const index = trans_traces[category]!.x.indexOf(date);
+      if (index === -1) {
+        trans_traces[category]!.x.push(date);
+        trans_traces[category]!.y.push(transaction.amount * -1);
+      } else {
+        trans_traces[category]!.y[index] += transaction.amount * -1;
       }
 
-      acc[category]![transaction.date.toISOString()] += transaction.amount * -1;
-
-      return acc;
+      return trans_traces;
     },
     {},
   );
-
-  const traces = Object.entries(traces_data).map(([category, dates]) => {
-    const x = Object.keys(dates).map((date) => new Date(date));
-    const y = Object.values(dates);
-    return {
-      x,
-      y,
-      type: "bar" as const,
-      name: category,
-    };
-  });
-  return traces;
+  return traces_data;
+}
+interface Trace {
+  x: string[];
+  y: number[];
+  type: "bar";
+  name: string;
+  marker: { color: string };
 }
