@@ -1,55 +1,70 @@
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { useState } from "react";
-import CategorySelector from "~/components/categorySelector";
-import type { Category } from "~/components/types";
-import ImportSuite from "./import_suite";
-import { ExportCategories, ExportTransactions } from "~/components/export";
-
-const MetaSidebar = () => {
-  return (
-    <>
-      <h2 className="text-2xl font-bold">Meta</h2>
-      <div className="flex flex-col gap-2">
-        <div>
-          <h3 className="text-lg font-bold">Transaction Category Mappings</h3>
-        </div>
-      </div>{" "}
-      <ExportTransactions></ExportTransactions>
-      <ExportCategories></ExportCategories>
-    </>
-  );
-};
-
+import { useContext, useState } from "react";
+import { Transaction, type Category } from "~/components/types";
+import { Box, Flex, SimpleGrid } from "@chakra-ui/react";
+import SystemStatus from "~/components/system_status";
+import { DataContext } from "~/components/data_context";
+import {
+  TotalTransactions,
+  TotalSpendings,
+  TotalEarnings,
+  TotalDiff,
+} from "~/components/kpis";
+import { FilterComponent } from "~/components/filter_compent";
+import { NegativeTransactionsPerInterval } from "~/components/negative_transactions_with_interval";
+import TransactionTable from "~/components/transaction_table/TransactionTable";
 export default function Home() {
   const ctx = useSession();
-  //get all categories
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
-    null,
-  );
+  const { data, handleDeleteTransaction, handleUpdateTransactionCategory } =
+    useContext(DataContext);
+
+  const [dataSelection, setDataSelection] = useState<Transaction[]>([]);
+  if (!data) {
+    return <>Loading</>;
+  }
+
   return (
     <>
-      <div className="head-row flex items-center justify-between px-4">
-        <h1 className="text-3xl font-extrabold tracking-tight text-white">
-          Hi {ctx.data?.user?.name}!
-        </h1>
+      <Flex justifyContent={"space-between"}>
+        <Box className="text-3xl font-extrabold tracking-tight text-white">
+          Welcome {ctx.data?.user?.name}!
+        </Box>
+        <Box>
+          <SystemStatus date={new Date()} />
+        </Box>
         <Link className="button" href="/import_suite">
           Import transactions
         </Link>
-      </div>
-
-      <CategorySelector
-        selectedCategory={selectedCategory}
-        onChange={(category: Category | null) => setSelectedCategory(category)}
+      </Flex>
+      <FilterComponent data={data} setDataSelection={setDataSelection} />
+      <SimpleGrid columns={4} gap={4}>
+        <TotalTransactions transactions={dataSelection} />
+        <TotalSpendings transactions={dataSelection} />
+        <TotalEarnings transactions={dataSelection} />
+        <TotalDiff transactions={dataSelection} />
+      </SimpleGrid>
+      <NegativeTransactionsPerInterval transactions={dataSelection} />
+      <TransactionTable
+        data={dataSelection}
+        handleDeleteTransaction={async (id) => {
+          await handleDeleteTransaction(id);
+          setDataSelection(
+            dataSelection.filter((transaction) => transaction.id !== id),
+          );
+        }}
+        handleUpdateTransactionCategory={async (id, category) => {
+          await handleUpdateTransactionCategory(id, category);
+          setDataSelection(
+            dataSelection.map((transaction) => {
+              if (transaction.id === id) {
+                return { ...transaction, category };
+              }
+              return transaction;
+            }),
+          );
+        }}
       />
-
-      <ImportSuite />
-      <div className="flex">
-        <div className="content w-3/4 bg-background"></div>
-        <div className="container  w-1/4 flex-row gap-5 bg-green-500 text-white">
-          <MetaSidebar />
-        </div>
-      </div>
     </>
   );
 }

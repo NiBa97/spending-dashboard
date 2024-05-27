@@ -7,7 +7,7 @@ import { DataContext, TransactionProvider } from "../components/data_context";
 import "~/styles/globals.css";
 import Link from "next/link";
 
-import { ChakraProvider } from "@chakra-ui/react";
+import { ChakraProvider, Container } from "@chakra-ui/react";
 const Navbar = () => {
   const router = useRouter();
   const linkClass = (href: string) =>
@@ -60,10 +60,10 @@ const MyApp: AppType<{ session: Session | null }> = ({
           </Head>
 
           <main className="flex min-h-screen flex-col  items-stretch bg-background pt-4">
-            <Navbar />
-            <div className="container mx-auto grow bg-red-500">
+            {/* <Navbar /> */}
+            <Container maxW="5xl" className=" mx-auto grow bg-red-500">
               <Component {...pageProps} />
-            </div>
+            </Container>
           </main>
         </TransactionProvider>
       </ChakraProvider>
