@@ -141,8 +141,16 @@ export const NegativeTransactionsPerInterval = ({
           plot_bgcolor: "rgba(0,0,0,0)",
           paper_bgcolor: "rgba(0,0,0,0)",
           barmode: "stack",
-          xaxis: { fixedrange: true },
-          yaxis: { fixedrange: true },
+          xaxis: { fixedrange: true, automargin: true },
+          yaxis: { fixedrange: true, automargin: true },
+          showlegend: false,
+          margin: {
+            l: 0,
+            r: 0,
+            b: 0,
+            t: 0,
+            pad: 4,
+          },
         }}
         config={{ displayModeBar: false }}
         style={{ width: "100%", height: "100%" }}
