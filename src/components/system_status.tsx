@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Text, HStack, Icon } from "@chakra-ui/react";
+import { Box, Text, HStack, Icon, Flex } from "@chakra-ui/react";
 import {
   FaCheckCircle,
   FaExclamationCircle,
@@ -7,46 +7,45 @@ import {
 } from "react-icons/fa";
 import { IconType } from "react-icons";
 
-const SystemStatus = ({ date }: { date: Date | undefined }) => {
+const SystemStatus = ({ date }: { date: Date }) => {
   const now = new Date();
-  let message = "Invalid date";
-  let color = "red.500";
-  let iconComponent: IconType = FaTimesCircle as IconType;
+  const iconComponent: IconType = FaExclamationCircle as IconType;
+  FaTimesCircle as IconType;
 
-  if (date) {
-    const diffInDays = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24),
-    );
+  const diffInDays = Math.floor(
+    (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24),
+  );
 
-    if (diffInDays <= 7) {
-      message = "System is up to date";
-      color = "green.500";
-      iconComponent = FaCheckCircle as IconType;
-    } else if (diffInDays <= 30) {
-      message = "System status is getting old";
-      color = "yellow.500";
-      iconComponent = FaExclamationCircle as IconType;
-    }
-  } else {
-    message = "System status is outdated";
+  if (diffInDays < 30) {
+    return <></>;
   }
 
   return (
-    <HStack
-      spacing={3}
+    <Flex
       p={3}
-      border="1px"
-      borderColor={color}
+      my={3}
+      bg={"yellow.500"}
       borderRadius="md"
+      color={"white"}
+      justifyContent={"space-between"}
+      alignContent={"center"}
     >
-      <Icon as={iconComponent} color={color} boxSize={6} />
-      <Box>
-        <Text fontSize="lg" color={color}>
-          {message}
+      <Flex>
+        <Icon
+          as={iconComponent}
+          color={"white"}
+          boxSize={6}
+          display={"inline"}
+          mr={2}
+        />
+        <Text fontSize="lg" display={"inline"}>
+          {"System status is getting old"}
         </Text>
-        {date && <Text fontSize="sm">Date: {date.toDateString()}</Text>}
-      </Box>
-    </HStack>
+      </Flex>
+      <Text fontSize="sm">
+        Last imported transaction is {diffInDays} days old.
+      </Text>
+    </Flex>
   );
 };
 
