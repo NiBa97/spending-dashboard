@@ -30,13 +30,19 @@ export default function Home() {
         <Box className="text-3xl font-extrabold tracking-tight text-white">
           Welcome {ctx.data?.user?.name}!
         </Box>
-        <Box>
-          <SystemStatus date={new Date()} />
-        </Box>
+
         <Link className="button" href="/import_suite">
           Import transactions
         </Link>
       </Flex>
+      {dataSelection.length > 0 && (
+        <SystemStatus
+          date={dataSelection.reduce(
+            (min, t) => (t.date < min ? t.date : min),
+            dataSelection[0]!.date,
+          )}
+        />
+      )}
       <FilterComponent data={data} setDataSelection={setDataSelection} />
       <SimpleGrid columns={4} gap={4}>
         <TotalTransactions transactions={dataSelection} />
