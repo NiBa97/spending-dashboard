@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -6,6 +6,11 @@ import {
   Flex,
   HStack,
   Icon,
+  NumberDecrementStepper,
+  NumberIncrementStepper,
+  NumberInput,
+  NumberInputField,
+  NumberInputStepper,
   Select,
   Table,
   Td,
@@ -50,6 +55,13 @@ const columns = [
     size: 5,
     minSize: 5,
     cell: (props) => props.getValue(),
+    filterFn: (
+      row: Row<{ amount: number }>,
+      columnId: string,
+      value: number,
+    ) => {
+      return Number(row.getValue("amount")) > value;
+    },
   }),
   columnHelper.accessor("category", {
     header: "Category",
@@ -67,6 +79,7 @@ const columns = [
       columnId: string,
       filterStatuses: string[],
     ) => {
+      console.log("Category filter", filterStatuses);
       if (filterStatuses.length === 0) return true;
       const category: Category | null = row.getValue("category");
       if (!category) return filterStatuses.includes("null");
@@ -117,7 +130,6 @@ function TransactionTable({
   ) => Promise<void>;
 }) {
   const [columnFilters, setColumnFilters] = useState<Filter[]>([]);
-
   const [globalFilter, setGlobalFilter] = useState("");
 
   const [pagination, setPagination] = useState({
@@ -208,6 +220,7 @@ function TransactionTable({
           globalFilter={globalFilter}
           setGlobalFilter={setGlobalFilter}
         />
+
         <CategorySelector
           placeholder="Update categories in selection"
           selectedCategory={null}
