@@ -3,44 +3,23 @@ import {
   Box,
   Text,
   SimpleGrid,
-  RangeSlider,
-  RangeSliderFilledTrack,
-  RangeSliderTrack,
-  RangeSliderThumb,
-  RangeSliderThumbProps,
-  useRangeSliderContext,
+  Input,
+  Flex,
+  Icon,
+  InputGroup,
+  InputLeftAddon,
+  HStack,
 } from "@chakra-ui/react";
 import { Transaction } from "~/components/types";
 import { useState, useEffect } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { FaCalendarAlt } from "react-icons/fa";
+import { FaArrowsLeftRight } from "react-icons/fa6";
+import { IconType } from "react-icons";
 
-const RangeSliderThumbWithHint = (props: RangeSliderThumbProps) => {
-  const { state } = useRangeSliderContext();
-  return (
-    <RangeSliderThumb {...props}>
-      <Box
-        top={-8}
-        pos="absolute"
-        h={6}
-        minWidth={4}
-        px={2}
-        borderRadius={8}
-        bg="gray.100"
-        border="1px solid"
-        borderColor="gray.200"
-        pointerEvents="none"
-        transition="opacity 200ms ease-out"
-        sx={{
-          ".chakra-slider__thumb:not([data-active]):not(:hover) > &": {
-            opacity: 0,
-          },
-        }}
-      >
-        {new Date(state.value[props.index]!).toLocaleDateString()}
-      </Box>
-    </RangeSliderThumb>
-  );
-};
-
+const caldendarAlt: IconType = FaCalendarAlt as IconType;
+const arrowsLeftRight: IconType = FaArrowsLeftRight as IconType;
 export const FilterComponent = ({
   data,
   setDataSelection,
@@ -64,18 +43,17 @@ export const FilterComponent = ({
     }
     return acc;
   });
-  const [rangeValue, setRangeValue] = useState([
-    oldestTransaction.date.getTime(),
-    newestTransaction.date.getTime(),
-  ]);
+
+  const [startDate, setStartDate] = useState<Date>(oldestTransaction.date);
+  const [endDate, setEndDate] = useState<Date>(newestTransaction.date);
   const refreshDataSelection = () => {
     const filterStatuses =
       columnFilters.find((f) => f.id === "category")?.value ?? [];
     const result = data.filter((transaction) => {
       const date = new Date(transaction.date);
       const date_fit =
-        rangeValue === undefined ||
-        (date.getTime() >= rangeValue[0]! && date.getTime() <= rangeValue[1]!);
+        date.getTime() >= startDate.getTime() &&
+        date.getTime() <= endDate.getTime();
       const category = transaction.category?.id ?? "null";
       const category_fit =
         filterStatuses.length === 0 || filterStatuses.includes(category);
@@ -85,7 +63,7 @@ export const FilterComponent = ({
   };
   useEffect(() => {
     refreshDataSelection();
-  }, [rangeValue, columnFilters]);
+  }, [startDate, endDate, columnFilters]);
   return (
     <SimpleGrid
       border={"solid 1px black"}
@@ -101,32 +79,56 @@ export const FilterComponent = ({
           setColumnFilters={setColumnFilters}
         />
       </Box>
+
       <Box>
-        <Text marginBottom={10} fontWeight={"bold"}>
-          Date range:
-        </Text>
-        <RangeSlider
-          aria-label={["min", "max"]}
-          min={oldestTransaction.date.getTime()}
-          max={newestTransaction.date.getTime()}
-          defaultValue={rangeValue}
-          onChangeEnd={(val) => setRangeValue(val)}
-          datatype="date"
-        >
-          <Box position={"absolute"} left={"0"} top={25}>
-            {oldestTransaction.date.toLocaleDateString()}
-          </Box>
-          <RangeSliderTrack>
-            <RangeSliderFilledTrack />
-          </RangeSliderTrack>
-          <RangeSliderThumbWithHint index={0}>
-            <Text marginTop={-50} align={"right"}></Text>
-          </RangeSliderThumbWithHint>
-          <RangeSliderThumbWithHint index={1}></RangeSliderThumbWithHint>
-          <Box right={0} position={"absolute"} top={25}>
-            {newestTransaction.date.toLocaleDateString()}
-          </Box>
-        </RangeSlider>
+        <Text fontWeight={"bold"}>Date range:</Text>
+        <HStack alignItems={"center"}>
+          <InputGroup mr={0}>
+            <InputLeftAddon>
+              <Icon as={caldendarAlt} />
+            </InputLeftAddon>
+            <DatePicker
+              selected={startDate}
+              onChange={(date) => setStartDate(date!)}
+              selectsStart
+              startDate={startDate}
+              endDate={endDate}
+              dateFormat="MMMM yyyy"
+              showMonthYearPicker
+              customInput={
+                <Input
+                  color="white"
+                  w={170}
+                  textAlign={"center"}
+                  borderLeftRadius={0}
+                />
+              }
+            />
+          </InputGroup>
+          <Icon as={arrowsLeftRight} />
+          <InputGroup>
+            <InputLeftAddon>
+              <Icon as={caldendarAlt} />
+            </InputLeftAddon>
+            <DatePicker
+              selected={endDate}
+              onChange={(date) => setEndDate(date!)}
+              selectsEnd
+              startDate={startDate}
+              endDate={endDate}
+              dateFormat="MMMM yyyy"
+              showMonthYearPicker
+              customInput={
+                <Input
+                  color="white"
+                  w={170}
+                  textAlign={"center"}
+                  borderLeftRadius={0}
+                />
+              }
+            />
+          </InputGroup>
+        </HStack>
       </Box>
     </SimpleGrid>
   );
