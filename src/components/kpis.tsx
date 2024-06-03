@@ -1,5 +1,13 @@
 import { Transaction } from "~/components/types";
-import { Box, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Stat,
+  StatArrow,
+  StatHelpText,
+  StatLabel,
+  StatNumber,
+  Text,
+} from "@chakra-ui/react";
 
 export const TotalSpendings = ({
   transactions,
@@ -10,7 +18,12 @@ export const TotalSpendings = ({
   const total = transactions
     .filter((transaction) => transaction.amount < 0)
     .reduce((acc, transaction) => acc + transaction.amount, 0);
-  return <Box>Total spendings: {Math.abs(total)}</Box>;
+  return (
+    <Stat>
+      <StatLabel>Total spendings</StatLabel>
+      <StatNumber>{Math.abs(total).toFixed(2)}€</StatNumber>
+    </Stat>
+  );
 };
 
 export const TotalEarnings = ({
@@ -22,7 +35,12 @@ export const TotalEarnings = ({
   const total = transactions
     .filter((transaction) => transaction.amount > 0)
     .reduce((acc, transaction) => acc + transaction.amount, 0);
-  return <Box>Total earnings: {total}</Box>;
+  return (
+    <Stat>
+      <StatLabel>Total earnings</StatLabel>
+      <StatNumber>{total.toFixed(2)}€</StatNumber>
+    </Stat>
+  );
 };
 
 export const TotalDiff = ({
@@ -36,12 +54,13 @@ export const TotalDiff = ({
   );
   // Add a green or a red icon infront
   return (
-    <Box>
-      Total difference{" "}
-      <Text as="span" color={total > 0 ? "green" : "white"} fontWeight={"bold"}>
-        {total}
-      </Text>
-    </Box>
+    <Stat>
+      <StatLabel>Total difference</StatLabel>
+      <StatNumber>
+        <StatArrow type={total > 0 ? "increase" : "decrease"} mt={-1} ml={2} />
+        {Math.abs(total).toFixed(2)}€
+      </StatNumber>
+    </Stat>
   );
 };
 
@@ -50,11 +69,15 @@ export const TotalTransactions = ({
 }: {
   transactions: Transaction[];
 }) => {
+  if (transactions.length === 0) {
+    return <Box>No transactions found</Box>;
+  }
+
   //calculate the total number of transactions
   return (
-    <Box>
-      Total transactions: <br />
-      {transactions.length}
-    </Box>
+    <Stat>
+      <StatLabel>Total transactions</StatLabel>
+      <StatNumber>{transactions.length}</StatNumber>
+    </Stat>
   );
 };

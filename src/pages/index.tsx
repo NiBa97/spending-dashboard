@@ -38,11 +38,11 @@ export default function Home() {
         </Link>
       </Flex>
       <FilterComponent data={data} setDataSelection={setDataSelection} />
-      <SimpleGrid columns={4} gap={4}>
+      <SimpleGrid columns={2} gap={4}>
         <TotalTransactions transactions={dataSelection} />
+        <TotalDiff transactions={dataSelection} />
         <TotalSpendings transactions={dataSelection} />
         <TotalEarnings transactions={dataSelection} />
-        <TotalDiff transactions={dataSelection} />
       </SimpleGrid>
       <NegativeTransactionsPerInterval transactions={dataSelection} />
       <TransactionTable
