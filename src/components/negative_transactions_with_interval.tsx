@@ -70,7 +70,7 @@ export const NegativeTransactionsPerInterval = ({
 }: {
   transactions: Transaction[];
 }) => {
-  const [interval, setInterval] = useState("day");
+  const [interval, setInterval] = useState("week");
   const [sampledTransactions, setSampledTransactions] = useState(transactions);
   useEffect(() => {
     const results = [];
