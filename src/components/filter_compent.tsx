@@ -9,12 +9,13 @@ import {
   InputGroup,
   InputLeftAddon,
   HStack,
+  IconButton,
 } from "@chakra-ui/react";
 import { Transaction } from "~/components/types";
 import { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { FaCalendarAlt } from "react-icons/fa";
+import { FaCalendarAlt, FaTrash } from "react-icons/fa";
 import { FaArrowsLeftRight } from "react-icons/fa6";
 import { IconType } from "react-icons";
 
@@ -64,16 +65,19 @@ export const FilterComponent = ({
   useEffect(() => {
     refreshDataSelection();
   }, [startDate, endDate, columnFilters]);
+  const resetFilters = () => {
+    setStartDate(
+      oldestTransaction ? new Date(oldestTransaction.date) : new Date(),
+    );
+    setEndDate(
+      newestTransaction ? new Date(newestTransaction.date) : new Date(),
+    );
+    setColumnFilters([]);
+  };
   return (
-    <SimpleGrid
-      border={"solid 1px black"}
-      borderRadius={5}
-      paddingY={30}
-      paddingX={30}
-      columns={2}
-    >
-      <Box marginBottom={5}>
-        <Text fontWeight={"bold"}>Category filter:</Text>
+    <SimpleGrid columns={2} py={2}>
+      <Box>
+        {/* <Text fontWeight={"bold"}>Category filter:</Text> */}
         <FilterPopover
           columnFilters={columnFilters}
           setColumnFilters={setColumnFilters}
@@ -81,13 +85,14 @@ export const FilterComponent = ({
       </Box>
 
       <Box>
-        <Text fontWeight={"bold"}>Date range:</Text>
+        {/* <Text fontWeight={"bold"}>Date range:</Text> */}
         <HStack alignItems={"center"}>
-          <InputGroup mr={0}>
+          <InputGroup mr={0} pr={0}>
             <InputLeftAddon>
               <Icon as={caldendarAlt} />
             </InputLeftAddon>
             <DatePicker
+              portalId="my-popper"
               selected={startDate}
               onChange={(date) => setStartDate(date!)}
               selectsStart
@@ -98,7 +103,7 @@ export const FilterComponent = ({
               customInput={
                 <Input
                   color="white"
-                  w={170}
+                  mr={0}
                   textAlign={"center"}
                   borderLeftRadius={0}
                 />
@@ -106,11 +111,12 @@ export const FilterComponent = ({
             />
           </InputGroup>
           <Icon as={arrowsLeftRight} />
-          <InputGroup>
+          <InputGroup pr={0}>
             <InputLeftAddon>
               <Icon as={caldendarAlt} />
             </InputLeftAddon>
             <DatePicker
+              portalId="my-popper"
               selected={endDate}
               onChange={(date) => setEndDate(date!)}
               selectsEnd
@@ -121,13 +127,17 @@ export const FilterComponent = ({
               customInput={
                 <Input
                   color="white"
-                  w={170}
                   textAlign={"center"}
                   borderLeftRadius={0}
                 />
               }
             />
-          </InputGroup>
+          </InputGroup>{" "}
+          <IconButton
+            icon={<FaTrash />}
+            onClick={() => resetFilters()}
+            aria-label={""}
+          />
         </HStack>
       </Box>
     </SimpleGrid>

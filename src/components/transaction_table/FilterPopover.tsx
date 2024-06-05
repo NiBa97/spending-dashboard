@@ -96,7 +96,7 @@ const FilterPopover = ({
     <Popover isLazy>
       <PopoverTrigger>
         <Button
-          size="sm"
+          size="md"
           leftIcon={<Icon as={CiFilter as IconType} fontSize={18} />}
         >
           Category Filter{" "}
@@ -107,12 +107,6 @@ const FilterPopover = ({
         <PopoverArrow />
         <PopoverCloseButton />
         <PopoverBody>
-          <Text fontSize="md" fontWeight="bold" mb={4}>
-            Filter By:
-          </Text>
-          <Text fontWeight="bold" color="gray.400" mb={1}>
-            Status
-          </Text>
           <VStack align="flex-start" spacing={1}>
             <CategoryItem
               category={{ id: "null", name: "Uncategorized", color: "black" }}
