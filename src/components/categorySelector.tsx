@@ -81,7 +81,7 @@ export default function CategorySelector({
   return (
     <div>
       <Menu isLazy offset={[0, 0]} flip={false} autoSelect={false}>
-        <MenuButton h="100%" w="100%" textAlign="left" p={1.5} color="gray.900">
+        <MenuButton color="gray.900" as={Button} size={"md"}>
           {selectedCategory ? (
             <CategoryDisplay category={selectedCategory} />
           ) : (

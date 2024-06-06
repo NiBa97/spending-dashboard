@@ -46,7 +46,6 @@ const CategoryItem = ({
     onClick={() => {
       setColumnFilters((prev) => {
         if (prev.length == 0) {
-          console.log("return early");
           return [
             {
               id: "category",
@@ -55,7 +54,7 @@ const CategoryItem = ({
           ];
         }
         const category_filters = prev.find((filter) => filter.id === "category")
-          ?.value;
+          ?.value as string[];
         if (!category_filters) {
           return prev.concat({
             id: "category",
@@ -89,7 +88,7 @@ const FilterPopover = ({
   setColumnFilters,
 }: FilterPopoverProps) => {
   const filterStatuses =
-    columnFilters.find((f) => f.id === "category")?.value ?? [];
+    (columnFilters.find((f) => f.id === "category")?.value as string[]) ?? [];
 
   const { categories } = useContext(DataContext);
   return (

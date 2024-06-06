@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -32,7 +32,7 @@ import {
 import { FaSort } from "react-icons/fa";
 import React from "react";
 import type { IconType } from "react-icons";
-import { Category, Transaction } from "~/components/types";
+import { Category, Filter, Transaction } from "~/components/types";
 import CateogryCell from "~/components/transaction_table/CategoryCell";
 import DeleteCell from "~/components/transaction_table/DeleteCell";
 import Filters from "~/components/transaction_table/Filters";
@@ -107,28 +107,17 @@ const columns = [
     cell: (props) => DeleteCell({ row: props.row, table: props.table }),
   }),
 ];
-interface Filter {
-  id: string;
-  value: string[];
-}
 declare module "@tanstack/table-core" {
   interface TableMeta<TData extends RowData> {
     updateCategory: (rowIndex: number, value: Category | null) => void;
     deleteRow: (rowIndex: number) => void;
   }
 }
-function TransactionTable({
-  data,
-  handleDeleteTransaction,
-  handleUpdateTransactionCategory,
-}: {
-  data: Transaction[];
-  handleDeleteTransaction: (id: string) => Promise<void>;
-  handleUpdateTransactionCategory: (
-    id: string,
-    category: Category | null,
-  ) => Promise<void>;
-}) {
+const TransactionTable = () => {
+  const { data, handleDeleteTransaction, handleUpdateTransactionCategory } =
+    useContext(DataContext);
+
+  if (!data) return <div>Loading!</div>;
   const [columnFilters, setColumnFilters] = useState<Filter[]>([]);
   const [globalFilter, setGlobalFilter] = useState("");
 
@@ -136,9 +125,7 @@ function TransactionTable({
     pageIndex: 0, //initial page index
     pageSize: 10, //default page size
   });
-
-  if (!data) return <div>Loading!</div>;
-
+  const [dataSelection, setDataSelection] = useState<Transaction[]>(data);
   const table = useReactTable({
     data,
     columns,
@@ -160,32 +147,33 @@ function TransactionTable({
       updateCategory: (rowIndex: number, value: Category | null) => {
         if (data[rowIndex] === undefined) return;
         data[rowIndex]!.category = value;
-        try {
-          handleUpdateTransactionCategory(data[rowIndex]!.id, value)
-            .then(() => {
-              console.log("Category updated");
-            })
-            .catch((e) => {
-              console.error(e);
-            });
-        } catch (e) {
-          console.error(e);
-        }
+        handleUpdateTransactionCategory(data[rowIndex]!.id, value)
+          .then(() => {
+            setDataSelection(
+              dataSelection.map((transaction) => {
+                if (transaction.id === data[rowIndex]!.id) {
+                  return { ...transaction, value };
+                }
+                return transaction;
+              }),
+            );
+          })
+          .catch((err) => {
+            console.log(err);
+          });
       },
       deleteRow: (rowIndex: number) => {
         data.splice(rowIndex, 1);
         const transaction = data[rowIndex];
         if (!transaction) return;
-        if (handleDeleteTransaction === undefined) {
-          alert("No delete function");
-          return;
-        }
         handleDeleteTransaction(transaction.id)
           .then(() => {
-            console.log("Transaction deleted");
+            setDataSelection(
+              dataSelection.filter((entry) => entry.id !== transaction.id),
+            );
           })
-          .catch((e) => {
-            console.error(e);
+          .catch((err) => {
+            console.log(err);
           });
       },
     },
@@ -320,6 +308,6 @@ function TransactionTable({
       </Flex>
     </Box>
   );
-}
+};
 
 export default TransactionTable;

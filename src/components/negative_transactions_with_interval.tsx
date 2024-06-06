@@ -67,10 +67,11 @@ function transactions_to_traces(
 }
 export const NegativeTransactionsPerInterval = ({
   transactions,
+  interval,
 }: {
   transactions: Transaction[];
+  interval: string;
 }) => {
-  const [interval, setInterval] = useState("week");
   const [sampledTransactions, setSampledTransactions] = useState(transactions);
   useEffect(() => {
     const results = [];
@@ -116,24 +117,6 @@ export const NegativeTransactionsPerInterval = ({
 
   return (
     <>
-      <Menu>
-        <Heading>
-          Transactions per{" "}
-          <MenuButton
-            as={Button}
-            textTransform={"capitalize"}
-            rightIcon={<FaChevronDown />}
-          >
-            {interval}
-          </MenuButton>
-        </Heading>
-        <MenuList>
-          <MenuItem onClick={() => setInterval("day")}>Day</MenuItem>
-          <MenuItem onClick={() => setInterval("week")}>Week</MenuItem>
-          <MenuItem onClick={() => setInterval("month")}>Month</MenuItem>
-        </MenuList>
-      </Menu>
-
       <Plot
         data={Object.values(traces)}
         layout={{
