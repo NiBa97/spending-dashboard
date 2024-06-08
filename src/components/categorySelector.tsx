@@ -42,7 +42,7 @@ export const CategoryDisplay = ({ category }: { category: Category }) => {
   );
 };
 
-export default function CategorySelector({
+export const CategorySelector = ({
   selectedCategory,
   onChange,
   placeholder = "Select Category", // Add this line
@@ -51,7 +51,7 @@ export default function CategorySelector({
   onChange: (category: Category | null) => void;
 
   placeholder?: string; // And this line
-}) {
+}) => {
   const [open, setOpen] = useState(false);
   const { categories } = useContext(DataContext);
 
@@ -80,8 +80,8 @@ export default function CategorySelector({
 
   return (
     <div>
-      <Menu isLazy offset={[0, 0]} flip={false} autoSelect={false}>
-        <MenuButton h="100%" w="100%" textAlign="left" p={1.5} color="gray.900">
+      <Menu autoSelect={false}>
+        <MenuButton color="gray.900" as={Button} size={"md"}>
           {selectedCategory ? (
             <CategoryDisplay category={selectedCategory} />
           ) : (
@@ -139,4 +139,4 @@ export default function CategorySelector({
       </Modal>
     </div>
   );
-}
+};

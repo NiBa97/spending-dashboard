@@ -1,76 +1,166 @@
-import { useSession } from "next-auth/react";
-import Link from "next/link";
-import { useContext, useState } from "react";
-import { Transaction, type Category } from "~/components/types";
-import { Box, Flex, SimpleGrid } from "@chakra-ui/react";
-import SystemStatus from "~/components/system_status";
-import { DataContext } from "~/components/data_context";
+import { useContext, useEffect, useState } from "react";
+import { type Filter, type Transaction } from "~/components/types";
 import {
-  TotalTransactions,
-  TotalSpendings,
-  TotalEarnings,
-  TotalDiff,
-} from "~/components/kpis";
-import { FilterComponent } from "~/components/filter_compent";
-import { NegativeTransactionsPerInterval } from "~/components/negative_transactions_with_interval";
-import TransactionTable from "~/components/transaction_table/TransactionTable";
-export default function Home() {
-  const ctx = useSession();
-  const { data, handleDeleteTransaction, handleUpdateTransactionCategory } =
-    useContext(DataContext);
+  Box,
+  Button,
+  Flex,
+  HStack,
+  Heading,
+  IconButton,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  SimpleGrid,
+} from "@chakra-ui/react";
+import { DataContext } from "~/components/data_context";
 
-  const [dataSelection, setDataSelection] = useState<Transaction[]>([]);
+import { NegativeTransactionsPerInterval } from "~/components/negative_transactions_with_interval";
+import { FaChevronDown, FaFilter, FaTrash } from "react-icons/fa";
+import FilterPopover from "~/components/transaction_table/FilterPopover";
+
+import {} from "react-icons/fa";
+import { DateRangeFilterComponent } from "~/components/date_range_filter";
+
+export const Home = () => {
+  const { data } = useContext(DataContext);
   if (!data) {
-    return <>Loading</>;
+    return <>Test1</>;
   }
+  const [interval, setInterval] = useState("week");
+  const [showFilter, setShowFilter] = useState(false);
+  const [dataSelection, setDataSelection] = useState<Transaction[]>(data);
 
   return (
     <>
-      <Flex justifyContent={"space-between"}>
-        <Box className="text-3xl font-extrabold tracking-tight text-white">
-          Welcome {ctx.data?.user?.name}!
-        </Box>
-
-        <Link className="button" href="/import_suite">
-          Import transactions
-        </Link>
-      </Flex>
-      {dataSelection.length > 0 && (
+      {/* {dataSelection.length > 0 && (
         <SystemStatus
           date={dataSelection.reduce(
             (min, t) => (t.date < min ? t.date : min),
             dataSelection[0]!.date,
           )}
         />
+      )} */}
+      <Flex justifyContent={"space-between"} alignItems={"center"}>
+        <Menu>
+          <Heading>
+            Transactions per{" "}
+            <MenuButton
+              as={Button}
+              textTransform={"capitalize"}
+              rightIcon={<FaChevronDown />}
+            >
+              {interval}
+            </MenuButton>
+          </Heading>
+          <MenuList>
+            <MenuItem onClick={() => setInterval("day")}>Day</MenuItem>
+            <MenuItem onClick={() => setInterval("week")}>Week</MenuItem>
+            <MenuItem onClick={() => setInterval("month")}>Month</MenuItem>
+          </MenuList>
+        </Menu>
+        <Button
+          leftIcon={<FaFilter />}
+          onClick={() => setShowFilter(!showFilter)}
+        >
+          Filter
+        </Button>
+      </Flex>
+      {showFilter && (
+        <Box mx={-4} mt={2} px={4} bg={"gray.300"}>
+          <FilterComponent setDataSelection={setDataSelection} data={data} />
+        </Box>
       )}
-      <FilterComponent data={data} setDataSelection={setDataSelection} />
-      <SimpleGrid columns={2} gap={4}>
+      {/* <SimpleGrid columns={4} gap={4} textAlign={"center"}>
         <TotalTransactions transactions={dataSelection} />
         <TotalDiff transactions={dataSelection} />
         <TotalSpendings transactions={dataSelection} />
         <TotalEarnings transactions={dataSelection} />
-      </SimpleGrid>
-      <NegativeTransactionsPerInterval transactions={dataSelection} />
-      <TransactionTable
-        data={dataSelection}
-        handleDeleteTransaction={async (id) => {
-          await handleDeleteTransaction(id);
-          setDataSelection(
-            dataSelection.filter((transaction) => transaction.id !== id),
-          );
-        }}
-        handleUpdateTransactionCategory={async (id, category) => {
-          await handleUpdateTransactionCategory(id, category);
-          setDataSelection(
-            dataSelection.map((transaction) => {
-              if (transaction.id === id) {
-                return { ...transaction, category };
-              }
-              return transaction;
-            }),
-          );
-        }}
+      </SimpleGrid> */}
+      <NegativeTransactionsPerInterval
+        transactions={dataSelection}
+        interval={interval}
       />
     </>
   );
-}
+};
+
+export const FilterComponent = ({
+  setDataSelection,
+  data,
+}: {
+  setDataSelection: React.Dispatch<React.SetStateAction<Transaction[]>>;
+  data: Transaction[];
+}) => {
+  const [columnFilters, setColumnFilters] = useState<Filter[]>([]);
+  const oldestTransaction = data.reduce((acc, transaction) => {
+    if (!acc || transaction.date < acc.date) {
+      return transaction;
+    }
+    return acc;
+  });
+
+  const newestTransaction = data.reduce((acc, transaction) => {
+    if (!acc || transaction.date > acc.date) {
+      return transaction;
+    }
+    return acc;
+  });
+
+  const [startDate, setStartDate] = useState<Date>(oldestTransaction.date);
+  const [endDate, setEndDate] = useState<Date>(newestTransaction.date);
+  const refreshDataSelection = () => {
+    const filterStatuses =
+      (columnFilters.find((f) => f.id === "category")?.value as string[]) ?? [];
+    const result = data.filter((transaction) => {
+      const date = new Date(transaction.date);
+      const dateFit =
+        date.getTime() >= startDate.getTime() &&
+        date.getTime() <= endDate.getTime();
+      const category = transaction.category?.id ?? "null";
+      const categoryFit =
+        filterStatuses.length === 0 || filterStatuses.includes(category);
+      return dateFit && categoryFit;
+    });
+    setDataSelection(result);
+  };
+  useEffect(() => {
+    refreshDataSelection();
+  }, [startDate, endDate, columnFilters]);
+  const resetFilters = () => {
+    setStartDate(
+      oldestTransaction ? new Date(oldestTransaction.date) : new Date(),
+    );
+    setEndDate(
+      newestTransaction ? new Date(newestTransaction.date) : new Date(),
+    );
+    setColumnFilters([]);
+  };
+  return (
+    <SimpleGrid columns={2} py={2}>
+      <Box>
+        {/* <Text fontWeight={"bold"}>Category filter:</Text> */}
+        <FilterPopover
+          columnFilters={columnFilters}
+          setColumnFilters={setColumnFilters}
+        />
+      </Box>
+
+      <Box>
+        <HStack alignItems={"center"}>
+          <DateRangeFilterComponent
+            startDate={startDate}
+            endDate={endDate}
+            setStartDate={setStartDate}
+            setEndDate={setEndDate}
+          />
+          <IconButton
+            icon={<FaTrash />}
+            onClick={() => resetFilters()}
+            aria-label={""}
+          />
+        </HStack>
+      </Box>
+    </SimpleGrid>
+  );
+};

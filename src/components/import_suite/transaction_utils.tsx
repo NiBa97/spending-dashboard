@@ -1,8 +1,8 @@
 import type { Transaction } from "../types";
-import _, { update } from "lodash";
+import _ from "lodash";
 import { api } from "~/utils/api";
 
-export function groupAndSortTransactions(
+export function group_and_sort_transactions(
   transactions: Transaction[],
   minCount: number,
 ): Record<string, Transaction[]> {
@@ -38,15 +38,15 @@ export function groupAndSortTransactions(
 }
 
 export function get_next_group(
-  current_group: string | null,
-  grouped_transactions: Record<string, Transaction[]>,
+  currentGroup: string | null,
+  groupedTransactions: Record<string, Transaction[]>,
 ) {
-  const groupNames = Object.keys(grouped_transactions);
-  if (current_group === null) {
+  const groupNames = Object.keys(groupedTransactions);
+  if (currentGroup === null) {
     return groupNames[0];
   }
   // get the index of the current group, and return the value of the next index
-  const currentIndex = groupNames.indexOf(current_group);
+  const currentIndex = groupNames.indexOf(currentGroup);
   console.log("currentIndex", currentIndex);
   if (currentIndex === groupNames.length - 1) {
     return undefined;
@@ -54,10 +54,10 @@ export function get_next_group(
   return groupNames[currentIndex + 1];
 }
 
-export function useUpdateTransactions() {
+export function use_update_transactions() {
   const { mutate: transaction } = api.transactions.createMany.useMutation();
 
-  function updateTransactions(transactions: Transaction[]): Transaction[] {
+  function update_transactions(transactions: Transaction[]): Transaction[] {
     return transaction(
       transactions.map((transaction) => ({
         date: transaction.date,
@@ -68,5 +68,5 @@ export function useUpdateTransactions() {
       })),
     )! as Transaction[];
   }
-  return updateTransactions;
+  return update_transactions;
 }

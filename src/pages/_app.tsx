@@ -1,54 +1,78 @@
 import { type Session } from "next-auth";
-import { SessionProvider } from "next-auth/react";
+import { SessionProvider, useSession } from "next-auth/react";
 import { type AppType } from "next/app";
 import Head from "next/head";
 import { api } from "~/utils/api";
-import { DataContext, TransactionProvider } from "../components/data_context";
+import { TransactionProvider } from "../components/data_context";
 import "~/styles/globals.css";
 import Link from "next/link";
-
-import { ChakraProvider, Container } from "@chakra-ui/react";
+import { FaHome, FaUpload } from "react-icons/fa";
+import {
+  Box,
+  Button,
+  ChakraProvider,
+  Container,
+  Flex,
+  HStack,
+} from "@chakra-ui/react";
 const Navbar = () => {
+  const ctx = useSession();
   const router = useRouter();
-  const linkClass = (href: string) =>
-    router.pathname === href
-      ? "text-primary whitespace-nowrap border-b pb-2 pt-1 font-semibold leading-none transition sm:px-2 active-link"
-      : "text-primary whitespace-nowrap border-b border-transparent pb-2 pt-1 leading-none transition hover:border-gray-300 dark:hover:border-gray-600 sm:px-2";
 
   return (
-    <div className="navbar bg-primary text-primary relative z-40 border-b px-3 text-white sm:px-6">
-      <div className="container mx-auto flex items-center justify-between">
-        <h1 className="font-bold">T3 App</h1>
-        <div className="-mb-px flex space-x-3 overflow-x-auto sm:space-x-0">
-          <Link className={linkClass("/")} href="/">
-            Dashboard
-          </Link>
-          <Link className={linkClass("/transactions")} href="/transactions">
-            Transactions
-          </Link>
-          <Link className={linkClass("/insights")} href="/insights">
-            Insights
-          </Link>
-          <Link
-            className={linkClass("/api/auth/signin")}
-            href="/api/auth/signin"
+    <Flex
+      justifyContent={"space-between"}
+      borderBottom={"3px solid black"}
+      my={5}
+      pb={5}
+    >
+      <Box className="text-3xl font-extrabold tracking-tight text-white">
+        Welcome {ctx.data?.user?.name}!
+      </Box>
+      <HStack gap={4}>
+        <Link className="" href="/">
+          <Button
+            leftIcon={<FaHome />}
+            aria-label={""}
+            size={"md"}
+            variant={router.pathname == "/" ? "solid" : "outline"}
           >
-            Sign out
-          </Link>
-        </div>
-      </div>
-    </div>
+            Dashboard
+          </Button>
+        </Link>
+        <Link className="" href="/transactions">
+          <Button
+            leftIcon={<FaTableList />}
+            aria-label={""}
+            size={"md"}
+            variant={router.pathname == "/transactions" ? "solid" : "outline"}
+          >
+            Transactions
+          </Button>
+        </Link>
+        <Link className="" href="/import_suite">
+          <Button
+            leftIcon={<FaUpload />}
+            aria-label={""}
+            size={"md"}
+            variant={router.pathname == "/import_suite" ? "solid" : "outline"}
+          >
+            Upload
+          </Button>
+        </Link>
+      </HStack>
+    </Flex>
   );
 };
-import { useEffect, useState } from "react";
-import { Transaction } from "../components/types";
 import { useRouter } from "next/router";
+import { FaTableList } from "react-icons/fa6";
 
 const MyApp: AppType<{ session: Session | null }> = ({
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   Component,
   pageProps: { session, ...pageProps },
 }) => {
-  const user = session?.user;
+  // const user = session?.user;
   return (
     <SessionProvider session={session}>
       <ChakraProvider>
@@ -60,8 +84,8 @@ const MyApp: AppType<{ session: Session | null }> = ({
           </Head>
 
           <main className="flex min-h-screen flex-col  items-stretch bg-background pt-4">
-            {/* <Navbar /> */}
-            <Container maxW="5xl" className=" mx-auto grow bg-red-500">
+            <Container maxW="6xl" className=" mx-auto grow bg-red-500">
+              <Navbar />
               <Component {...pageProps} />
             </Container>
           </main>

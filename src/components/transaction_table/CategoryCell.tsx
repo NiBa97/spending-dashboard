@@ -1,6 +1,6 @@
-import CategorySelector from "../categorySelector";
-import { Row, TableMeta, Table } from "@tanstack/react-table";
-import { Category, Transaction } from "../types";
+import { CategorySelector } from "../categorySelector";
+import { type Row, type TableMeta, type Table } from "@tanstack/react-table";
+import { type Category, type Transaction } from "../types";
 interface CustomTableMeta extends TableMeta<Category> {
   updateCategory: (rowIndex: number, value: object | null) => void;
 }

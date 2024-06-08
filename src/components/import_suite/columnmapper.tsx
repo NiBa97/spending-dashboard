@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { Transaction } from "../types";
-const target_columns = ["Date", "Name", "Usage", "Amount"];
+const TARGET_COLUMNS = ["Date", "Name", "Usage", "Amount"];
 
-export function ColumnMapper({
+export const ColumnMapper = ({
   data,
   onNext,
   onBack,
@@ -17,7 +16,7 @@ export function ColumnMapper({
     }[],
   ) => void;
   onBack: () => void;
-}) {
+}) => {
   const [selectedColumns, setSelectedColumns] = useState<
     Record<string, string>
   >({
@@ -84,13 +83,14 @@ export function ColumnMapper({
           category: null;
         } => item !== null,
       )
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       .map(({ category, ...rest }) => rest);
 
     onNext(filteredData);
   };
   return (
     <div>
-      {target_columns.map((item, index) => (
+      {TARGET_COLUMNS.map((item, index) => (
         <div key={index}>
           <label htmlFor={`dropdown-${index}`}>{item}</label>
           <select
@@ -127,4 +127,4 @@ export function ColumnMapper({
       <button onClick={handleSubmit}>Submit</button>
     </div>
   );
-}
+};

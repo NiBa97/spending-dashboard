@@ -31,6 +31,27 @@ const config = {
         checksVoidReturn: { attributes: false },
       },
     ],
+    //add linting for general naming conventions
+    "@typescript-eslint/naming-convention": [
+      "warn",
+      {
+        selector: "variable",
+        format: ["camelCase", "UPPER_CASE", "PascalCase"],
+      },
+      {
+        selector: "function",
+        format: ["snake_case",],
+      },
+      {
+        selector: "parameter",
+        format: ["camelCase"],
+        leadingUnderscore: "allow",
+      },
+      {
+        selector: "typeLike",
+        format: ["PascalCase"],
+      },
+    ],
   },
 };
 

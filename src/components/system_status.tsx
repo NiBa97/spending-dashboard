@@ -1,11 +1,7 @@
 import React from "react";
-import { Box, Text, HStack, Icon, Flex } from "@chakra-ui/react";
-import {
-  FaCheckCircle,
-  FaExclamationCircle,
-  FaTimesCircle,
-} from "react-icons/fa";
-import { IconType } from "react-icons";
+import { Text, Icon, Flex } from "@chakra-ui/react";
+import { FaExclamationCircle, FaTimesCircle } from "react-icons/fa";
+import { type IconType } from "react-icons";
 
 const SystemStatus = ({ date }: { date: Date }) => {
   const now = new Date();
