@@ -3,7 +3,7 @@ import { SessionProvider, useSession } from "next-auth/react";
 import { type AppType } from "next/app";
 import Head from "next/head";
 import { api } from "~/utils/api";
-import { DataContext, TransactionProvider } from "../components/data_context";
+import { TransactionProvider } from "../components/data_context";
 import "~/styles/globals.css";
 import Link from "next/link";
 import { FaHome, FaUpload } from "react-icons/fa";
@@ -18,10 +18,6 @@ import {
 const Navbar = () => {
   const ctx = useSession();
   const router = useRouter();
-  const linkClass = (href: string) =>
-    router.pathname === href
-      ? "text-primary whitespace-nowrap border-b pb-2 pt-1 font-semibold leading-none transition sm:px-2 active-link"
-      : "text-primary whitespace-nowrap border-b border-transparent pb-2 pt-1 leading-none transition hover:border-gray-300 dark:hover:border-gray-600 sm:px-2";
 
   return (
     <Flex
@@ -68,8 +64,6 @@ const Navbar = () => {
     </Flex>
   );
 };
-import { useEffect, useState } from "react";
-import { Transaction } from "../components/types";
 import { useRouter } from "next/router";
 import { FaTableList } from "react-icons/fa6";
 
@@ -89,7 +83,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
           </Head>
 
           <main className="flex min-h-screen flex-col  items-stretch bg-background pt-4">
-            <Container maxW="5xl" className=" mx-auto grow bg-red-500">
+            <Container maxW="6xl" className=" mx-auto grow bg-red-500">
               <Navbar />
               <Component {...pageProps} />
             </Container>

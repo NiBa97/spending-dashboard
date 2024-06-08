@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import {
   Box,
   Button,
@@ -8,6 +8,15 @@ import {
   FormLabel,
   HStack,
   Icon,
+  IconButton,
+  Input,
+  InputGroup,
+  InputLeftAddon,
+  InputLeftElement,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
   NumberDecrementStepper,
   NumberIncrementStepper,
   NumberInput,
@@ -31,16 +40,22 @@ import {
   RowData,
   Row,
 } from "@tanstack/react-table";
-import { FaSort } from "react-icons/fa";
+import { FaMoneyBill, FaSearch, FaSort, FaTrash } from "react-icons/fa";
 import React from "react";
 import type { IconType } from "react-icons";
 import { Category, Filter, Transaction } from "~/components/types";
 import CateogryCell from "~/components/transaction_table/CategoryCell";
 import DeleteCell from "~/components/transaction_table/DeleteCell";
-import Filters from "~/components/transaction_table/Filters";
 import { DataContext } from "~/components/data_context";
 import CategorySelector from "~/components/categorySelector";
-import { DateRangeFilterComponent } from "~/components/date_range_filter";
+import { DateRangeFilterComponent } from "~/components/filters/date_range_filter";
+import FilterPopover from "~/components/transaction_table/FilterPopover";
+import { FaArrowsLeftRight, FaChevronDown } from "react-icons/fa6";
+import { AmountRangeFilterComponent } from "~/components/filters/amount_range_filter";
+import { TextFilterComponent } from "~/components/filters/text_filter";
+import MainTable from "~/components/transaction_table/main_table";
+
+const arrowsLeftRight: IconType = FaArrowsLeftRight as IconType;
 const columnHelper = createColumnHelper<Transaction>();
 const columns = [
   columnHelper.accessor("receiver", {
@@ -127,22 +142,20 @@ const TransactionTablePage = () => {
     useContext(DataContext);
 
   if (!data) return <div>Loading!</div>;
-  const oldestTransaction = data.reduce((acc, transaction) => {
-    if (!acc || transaction.date < acc.date) {
-      return transaction;
+  const dateRangeFilterRef = useRef<{ reset: () => void }>(null);
+  const amountRangeFilterRef = useRef<{ reset: () => void }>(null);
+  const textFilterRef = useRef<{ reset: () => void }>(null);
+  const handleReset = () => {
+    if (dateRangeFilterRef.current) {
+      dateRangeFilterRef.current.reset();
     }
-    return acc;
-  });
-
-  const newestTransaction = data.reduce((acc, transaction) => {
-    if (!acc || transaction.date > acc.date) {
-      return transaction;
+    if (amountRangeFilterRef.current) {
+      amountRangeFilterRef.current.reset();
     }
-    return acc;
-  });
-
-  const [startDate, setStartDate] = useState<Date>(oldestTransaction.date);
-  const [endDate, setEndDate] = useState<Date>(newestTransaction.date);
+    if (textFilterRef.current) {
+      textFilterRef.current.reset();
+    }
+  };
   const [columnFilters, setColumnFilters] = useState<Filter[]>([]);
   const [globalFilter, setGlobalFilter] = useState("");
 
@@ -205,107 +218,6 @@ const TransactionTablePage = () => {
     },
   });
 
-  const updateAllFilteredCategories = async (newCategory: Category | null) => {
-    if (
-      !window.confirm(
-        `Are you sure you want to update the category of ${
-          table.getFilteredRowModel().rows.length
-        } transactions?`,
-      )
-    ) {
-      return;
-    }
-    for (const row of table.getFilteredRowModel().rows) {
-      table.options.meta?.updateCategory(row.index, newCategory);
-    }
-  };
-  const setAmountFilter = (value: number[]) => {
-    if (!value[0]) value[0] = minAmount;
-    if (!value[1]) value[1] = maxAmount;
-    const amountFilter = columnFilters.find((filter) => filter.id === "amount");
-    if (amountFilter) {
-      setColumnFilters((prev) => {
-        return prev.map((f) =>
-          f.id === "amount"
-            ? {
-                ...f,
-                value: value,
-              }
-            : f,
-        );
-      });
-    } else {
-      setColumnFilters((prev) => {
-        return prev.concat({
-          id: "amount",
-          value: value,
-        });
-      });
-    }
-  };
-  const maxAmount = data.reduce((acc, transaction) => {
-    if (!acc || transaction.amount > acc.amount) {
-      return transaction;
-    }
-    return acc;
-  }).amount;
-  console.log(maxAmount);
-  const minAmount = data.reduce((acc, transaction) => {
-    if (!acc || transaction.amount < acc.amount) {
-      return transaction;
-    }
-    return acc;
-  }).amount;
-
-  const handleGreaterThanChange = (
-    valueString: string,
-    valueNumber: number,
-  ) => {
-    const currentFilter = columnFilters.find(
-      (filter) => filter.id === "amount",
-    );
-    const currentValues = currentFilter
-      ? currentFilter.value
-      : [undefined, maxAmount];
-    setAmountFilter([
-      valueNumber,
-      currentValues[1] as number,
-      currentValues[2] as number,
-    ]);
-  };
-
-  const handleLessThanChange = (valueString: string, valueNumber: number) => {
-    const currentFilter = columnFilters.find(
-      (filter) => filter.id === "amount",
-    );
-    const currentValues = currentFilter
-      ? currentFilter.value
-      : [minAmount, undefined];
-    setAmountFilter([currentValues[0] as number, valueNumber]);
-  };
-
-  useEffect(() => {
-    const amountFilter = columnFilters.find((filter) => filter.id === "date");
-    if (amountFilter) {
-      setColumnFilters((prev) => {
-        return prev.map((f) =>
-          f.id === "date"
-            ? {
-                ...f,
-                value: [startDate.getTime(), endDate.getTime()],
-              }
-            : f,
-        );
-      });
-    } else {
-      setColumnFilters((prev) => {
-        return prev.concat({
-          id: "date",
-          value: [startDate.getTime(), endDate.getTime()],
-        });
-      });
-    }
-  }, [startDate, endDate]);
   return (
     <Box>
       <Flex
@@ -315,153 +227,43 @@ const TransactionTablePage = () => {
         py={2}
       >
         <DateRangeFilterComponent
-          startDate={startDate}
-          endDate={endDate}
-          setStartDate={setStartDate}
-          setEndDate={setEndDate}
+          ref={dateRangeFilterRef}
+          data={data}
+          filters={columnFilters}
+          setFilters={setColumnFilters}
         />
-        <FormControl>
-          <Flex align="center" alignItems={"center"}>
-            <FormLabel>Amount greater than: </FormLabel>
-            <NumberInput
-              onChange={(valueString, valueNumber) =>
-                handleGreaterThanChange(valueString, valueNumber)
-              }
-              isRequired={true}
-              defaultValue={minAmount}
-              min={minAmount}
-            >
-              <NumberInputField w={100} />
-              <NumberInputStepper>
-                <NumberIncrementStepper />
-                <NumberDecrementStepper />
-              </NumberInputStepper>
-            </NumberInput>
-          </Flex>
-        </FormControl>
-
-        <FormControl>
-          <Flex align="center" alignItems={"center"}>
-            <FormLabel>Amount less than:</FormLabel>
-            <NumberInput
-              onChange={(valueString, valueNumber) =>
-                handleLessThanChange(valueString, valueNumber)
-              }
-              defaultValue={maxAmount}
-              max={maxAmount}
-            >
-              <NumberInputField w={100} />
-              <NumberInputStepper>
-                <NumberIncrementStepper />
-                <NumberDecrementStepper />
-              </NumberInputStepper>
-            </NumberInput>
-          </Flex>
-        </FormControl>
-        <Filters
-          columnFilters={columnFilters}
-          setColumnFilters={setColumnFilters}
-          globalFilter={globalFilter}
-          setGlobalFilter={setGlobalFilter}
+        <AmountRangeFilterComponent
+          ref={amountRangeFilterRef}
+          data={data}
+          filters={columnFilters}
+          setFilters={setColumnFilters}
         />
-
-        <CategorySelector
-          placeholder="Update categories in selection"
-          selectedCategory={null}
-          onChange={(category) => {
-            void updateAllFilteredCategories(category);
-          }}
+        <IconButton
+          icon={<FaTrash />}
+          onClick={() => handleReset()}
+          aria-label={""}
         />
       </Flex>
-      <Table className="w-full">
-        {table.getHeaderGroups().map((headerGroup) => (
-          <Tr className="tr" key={headerGroup.id}>
-            {headerGroup.headers.map((header) => (
-              <Th
-                className="th"
-                w={header.getSize()}
-                key={header.id}
-                onClick={header.column.getToggleSortingHandler()}
-              >
-                {flexRender(
-                  header.column.columnDef.header,
-                  header.getContext(),
-                )}
-                {header.column.getCanSort() && (
-                  <Icon
-                    as={FaSort as IconType}
-                    mx={3}
-                    fontSize={14}
-                    onClick={header.column.getToggleSortingHandler()}
-                  />
-                )}
-                {{
-                  asc: " 🔼",
-                  desc: " 🔽",
-                }[header.column.getIsSorted() as string] ?? null}
-                <Box
-                  onMouseDown={header.getResizeHandler()}
-                  onTouchStart={header.getResizeHandler()}
-                  className={`resizer ${
-                    header.column.getIsResizing() ? "isResizing" : ""
-                  }`}
-                />
-              </Th>
-            ))}
-          </Tr>
-        ))}
-        {table.getRowModel().rows.map((row) => (
-          <Tr className="tr" key={row.id}>
-            {row.getVisibleCells().map((cell) => (
-              <Td className="td" w={cell.column.getSize()} key={cell.id}>
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </Td>
-            ))}
-          </Tr>
-        ))}
-      </Table>
-      <br />
       <Flex
-        width={"100%"}
+        alignItems={"center"}
         justifyContent={"space-between"}
         px={6}
-        alignItems={"center"}
+        py={2}
       >
-        <Text>
-          Page {table.getState().pagination.pageIndex + 1} of{" "}
-          {table.getPageCount()}
-          <br />
-          Current rows: {table.getFilteredRowModel().rows?.length ?? 0}
-        </Text>
-        <ButtonGroup size="sm" isAttached variant="outline">
-          <Button
-            onClick={() => table.previousPage()}
-            isDisabled={!table.getCanPreviousPage()}
-          >
-            {"<"} Previous
-          </Button>
-          <Button
-            onClick={() => table.nextPage()}
-            isDisabled={!table.getCanNextPage()}
-          >
-            Next {">"}
-          </Button>
-        </ButtonGroup>
-
-        <HStack spacing={2} mb={2}>
-          <Box>Rows per page:</Box>
-          <Select
-            w={20}
-            defaultValue={10}
-            onChange={(e) => table.setPageSize(parseInt(e.target.value))}
-          >
-            <option value={10}>10</option>
-            <option value={25}>25</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
-          </Select>
+        <HStack>
+          <TextFilterComponent
+            ref={textFilterRef}
+            textFilter={globalFilter}
+            setTextFilter={setGlobalFilter}
+            placeholder="Reciever or Usage"
+          />
+          <FilterPopover
+            columnFilters={columnFilters}
+            setColumnFilters={setColumnFilters}
+          />
         </HStack>
       </Flex>
+      <MainTable table={table}></MainTable>
     </Box>
   );
 };
