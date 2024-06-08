@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { DataContext } from "./data_context";
-import { Transaction, Category } from "./types";
+import { type Transaction, type Category } from "./types";
 const downloadCSV = (csv: string, filename: string) => {
   const blob = new Blob([csv], { type: "text/csv" });
   const link = document.createElement("a");

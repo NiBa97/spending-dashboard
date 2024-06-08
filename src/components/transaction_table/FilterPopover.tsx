@@ -8,18 +8,15 @@ import {
   PopoverBody,
   PopoverTrigger,
   VStack,
-  Text,
   Flex,
 } from "@chakra-ui/react";
 import { CiFilter } from "react-icons/ci";
-import { IconType } from "react-icons";
+import { type IconType } from "react-icons";
 
-import ColorIcon from "./CategoryCell";
-import { Category, Filter } from "../types";
+import { type Category, type Filter } from "../types";
 import { useContext } from "react";
 import { DataContext } from "../data_context";
 import { CategoryDisplay } from "../categorySelector";
-const static_categories = ["Food", "Transport", "Entertainment", "Other"];
 
 interface CategoryItemProps {
   category: Category;
@@ -53,9 +50,9 @@ const CategoryItem = ({
             },
           ];
         }
-        const category_filters = prev.find((filter) => filter.id === "category")
+        const categoryFilters = prev.find((filter) => filter.id === "category")
           ?.value as string[];
-        if (!category_filters) {
+        if (!categoryFilters) {
           return prev.concat({
             id: "category",
             value: [category.id],
@@ -67,8 +64,8 @@ const CategoryItem = ({
             ? {
                 ...f,
                 value: isActive
-                  ? category_filters.filter((c) => c !== category.id)
-                  : category_filters.concat(category.id),
+                  ? categoryFilters.filter((c) => c !== category.id)
+                  : categoryFilters.concat(category.id),
               }
             : f,
         );

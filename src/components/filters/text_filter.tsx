@@ -1,6 +1,6 @@
 import { InputGroup, Icon, Input, InputLeftElement } from "@chakra-ui/react";
 import React, { useImperativeHandle, forwardRef } from "react";
-import { IconType } from "react-icons";
+import { type IconType } from "react-icons";
 import { FaSearch } from "react-icons/fa";
 
 interface TextFilterComponentProps {

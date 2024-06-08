@@ -1,10 +1,10 @@
 import { useDropzone } from "react-dropzone";
 import Papa from "papaparse";
-export default function UploadComponent({
+export const UploadComponent = ({
   onNext,
 }: {
   onNext: (data: Record<string, string>[]) => void;
-}) {
+}) => {
   const onDrop = (acceptedFiles: File[]) => {
     Papa.parse(acceptedFiles[0]!, {
       header: true,
@@ -31,4 +31,4 @@ export default function UploadComponent({
       )}
     </div>
   );
-}
+};

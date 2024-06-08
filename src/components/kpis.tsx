@@ -1,13 +1,5 @@
-import { Transaction } from "~/components/types";
-import {
-  Box,
-  Stat,
-  StatArrow,
-  StatHelpText,
-  StatLabel,
-  StatNumber,
-  Text,
-} from "@chakra-ui/react";
+import { type Transaction } from "~/components/types";
+import { Box, Stat, StatArrow, StatLabel, StatNumber } from "@chakra-ui/react";
 
 export const TotalSpendings = ({
   transactions,

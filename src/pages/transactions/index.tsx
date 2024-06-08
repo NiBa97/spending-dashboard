@@ -1,61 +1,31 @@
-import { useContext, useEffect, useRef, useState } from "react";
-import {
-  Box,
-  Button,
-  ButtonGroup,
-  Flex,
-  FormControl,
-  FormLabel,
-  HStack,
-  Icon,
-  IconButton,
-  Input,
-  InputGroup,
-  InputLeftAddon,
-  InputLeftElement,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  NumberDecrementStepper,
-  NumberIncrementStepper,
-  NumberInput,
-  NumberInputField,
-  NumberInputStepper,
-  Select,
-  Table,
-  Td,
-  Text,
-  Th,
-  Tr,
-} from "@chakra-ui/react";
+import { useContext, useRef, useState } from "react";
+import { Box, Flex, HStack, IconButton } from "@chakra-ui/react";
 import {
   createColumnHelper,
-  flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
-  RowData,
-  Row,
+  type RowData,
+  type Row,
 } from "@tanstack/react-table";
-import { FaMoneyBill, FaSearch, FaSort, FaTrash } from "react-icons/fa";
+import { FaTrash } from "react-icons/fa";
 import React from "react";
-import type { IconType } from "react-icons";
-import { Category, Filter, Transaction } from "~/components/types";
+import {
+  type Category,
+  type Filter,
+  type Transaction,
+} from "~/components/types";
 import CateogryCell from "~/components/transaction_table/CategoryCell";
 import DeleteCell from "~/components/transaction_table/DeleteCell";
 import { DataContext } from "~/components/data_context";
-import CategorySelector from "~/components/categorySelector";
 import { DateRangeFilterComponent } from "~/components/filters/date_range_filter";
 import FilterPopover from "~/components/transaction_table/FilterPopover";
-import { FaArrowsLeftRight, FaChevronDown } from "react-icons/fa6";
 import { AmountRangeFilterComponent } from "~/components/filters/amount_range_filter";
 import { TextFilterComponent } from "~/components/filters/text_filter";
 import MainTable from "~/components/transaction_table/main_table";
 
-const arrowsLeftRight: IconType = FaArrowsLeftRight as IconType;
 const columnHelper = createColumnHelper<Transaction>();
 const columns = [
   columnHelper.accessor("receiver", {
@@ -132,12 +102,13 @@ const columns = [
   }),
 ];
 declare module "@tanstack/table-core" {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface TableMeta<TData extends RowData> {
     updateCategory: (rowIndex: number, value: Category | null) => void;
     deleteRow: (rowIndex: number) => void;
   }
 }
-const TransactionTablePage = () => {
+const transactionTablePage = () => {
   const { data, handleDeleteTransaction, handleUpdateTransactionCategory } =
     useContext(DataContext);
 
@@ -267,4 +238,4 @@ const TransactionTablePage = () => {
     </Box>
   );
 };
-export default TransactionTablePage;
+export default transactionTablePage;

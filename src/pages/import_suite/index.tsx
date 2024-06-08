@@ -1,14 +1,17 @@
-import { Reducer, useContext, useEffect, useReducer, useState } from "react";
-import UploadComponent from "../../components/import_suite/uploader";
+import {
+  type Reducer,
+  useContext,
+  useEffect,
+  useReducer,
+  useState,
+} from "react";
+import { UploadComponent } from "../../components/import_suite/uploader";
 import { ColumnMapper } from "../../components/import_suite/columnmapper";
 import { ImportStatus } from "../../components/types";
-import type { Transaction } from "../../components/types";
 import { DataContext } from "../../components/data_context";
 
 import { useRouter } from "next/router";
-import { set } from "lodash";
-import { BreadcrumbLink } from "@chakra-ui/react";
-export default function ImportSuite() {
+export const ImportSuite = () => {
   interface MyState {
     importState: ImportStatus;
     imported_data: Record<string, string>[];
@@ -64,11 +67,11 @@ export default function ImportSuite() {
     case ImportStatus.FILEUPLOAD:
       return (
         <UploadComponent
-          onNext={(raw_data: Record<string, string>[]) => {
+          onNext={(rawData: Record<string, string>[]) => {
             if (router.pathname === "/import_suite") {
-              setTransactions(raw_data);
+              setTransactions(rawData);
             } else {
-              localStorage.setItem("raw_data", JSON.stringify(raw_data));
+              localStorage.setItem("raw_data", JSON.stringify(rawData));
               void router.push(
                 {
                   pathname: "/import_suite",
@@ -86,8 +89,8 @@ export default function ImportSuite() {
         <ColumnMapper
           data={state.imported_data}
           onBack={() => console.log("back")}
-          onNext={(columnised_data) => {
-            handleCreateManyTransactions(columnised_data)
+          onNext={(columnisedData) => {
+            handleCreateManyTransactions(columnisedData)
               .then(() => {
                 // setImportedData([]);
                 // setColumnisedData([]);
@@ -104,4 +107,4 @@ export default function ImportSuite() {
         />
       );
   }
-}
+};

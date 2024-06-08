@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { Filter, Transaction } from "~/components/types";
+import { type Filter, type Transaction } from "~/components/types";
 import {
   Box,
   Button,
@@ -16,14 +16,13 @@ import {
 import { DataContext } from "~/components/data_context";
 
 import { NegativeTransactionsPerInterval } from "~/components/negative_transactions_with_interval";
-import { FaChevronDown, FaFilter, FaUpload, FaTrash } from "react-icons/fa";
+import { FaChevronDown, FaFilter, FaTrash } from "react-icons/fa";
 import FilterPopover from "~/components/transaction_table/FilterPopover";
 
 import {} from "react-icons/fa";
-import { IconType } from "react-icons";
 import { DateRangeFilterComponent } from "~/components/date_range_filter";
 
-export default function Home() {
+export const Home = () => {
   const { data } = useContext(DataContext);
   if (!data) {
     return <>Test1</>;
@@ -84,7 +83,7 @@ export default function Home() {
       />
     </>
   );
-}
+};
 
 export const FilterComponent = ({
   setDataSelection,
@@ -115,13 +114,13 @@ export const FilterComponent = ({
       (columnFilters.find((f) => f.id === "category")?.value as string[]) ?? [];
     const result = data.filter((transaction) => {
       const date = new Date(transaction.date);
-      const date_fit =
+      const dateFit =
         date.getTime() >= startDate.getTime() &&
         date.getTime() <= endDate.getTime();
       const category = transaction.category?.id ?? "null";
-      const category_fit =
+      const categoryFit =
         filterStatuses.length === 0 || filterStatuses.includes(category);
-      return date_fit && category_fit;
+      return dateFit && categoryFit;
     });
     setDataSelection(result);
   };

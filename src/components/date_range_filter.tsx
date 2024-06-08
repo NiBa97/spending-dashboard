@@ -1,14 +1,7 @@
-import {
-  HStack,
-  InputGroup,
-  InputLeftAddon,
-  Icon,
-  IconButton,
-  Input,
-} from "@chakra-ui/react";
+import { InputGroup, InputLeftAddon, Icon, Input } from "@chakra-ui/react";
 import React from "react";
-import { IconType } from "react-icons";
-import { FaCalendarAlt, FaTrash } from "react-icons/fa";
+import { type IconType } from "react-icons";
+import { FaCalendarAlt } from "react-icons/fa";
 import { FaArrowsLeftRight } from "react-icons/fa6";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -19,6 +12,7 @@ interface DateRangeFilterComponentProps {
   setEndDate: React.Dispatch<React.SetStateAction<Date>>;
 }
 const caldendarAlt: IconType = FaCalendarAlt as IconType;
+
 const arrowsLeftRight: IconType = FaArrowsLeftRight as IconType;
 export const DateRangeFilterComponent: React.FC<
   DateRangeFilterComponentProps

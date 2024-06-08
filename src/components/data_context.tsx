@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState } from "react";
-import { Category, Transaction } from "./types";
+import { type Category, type Transaction } from "./types";
 import { api } from "~/utils/api";
 import { set } from "lodash";
 interface DataContextProps {
@@ -25,34 +25,35 @@ interface DataContextProps {
   categories: Category[] | null;
 }
 
-export const DataContext = createContext<DataContextProps>({
+const defaultDataContextProps: DataContextProps = {
   data: null,
-  handleUpdateTransaction: async (
-    id: string,
-    updatedFields: Partial<Transaction>,
-  ) => {}, // eslint-disable-line @typescript-eslint/no-empty-function
-  handleCreateTransaction: async (transaction: Partial<Transaction>) => {}, // eslint-disable-line @typescript-eslint/no-empty-function
-  handleCreateManyTransactions: async (
-    transactions: {
-      date: Date;
-      receiver: string;
-      usage: string;
-      amount: number;
-    }[],
-  ) => {}, // eslint-disable-line @typescript-eslint/no-empty-function
-  handleDeleteTransaction: async (id: string) => {}, // eslint-disable-line @typescript-eslint/no-empty-function
-  handleUpdateTransactionCategory: async (
-    id: string,
-    category: Category | null,
-  ) => {}, // eslint-disable-line @typescript-eslint/no-empty-function
+  handleUpdateTransaction: async () => {
+    throw new Error("handleUpdateTransaction not implemented");
+  },
+  handleCreateTransaction: async () => {
+    throw new Error("handleCreateTransaction not implemented");
+  },
+  handleCreateManyTransactions: async () => {
+    throw new Error("handleCreateManyTransactions not implemented");
+  },
+  handleDeleteTransaction: async () => {
+    throw new Error("handleDeleteTransaction not implemented");
+  },
+  handleUpdateTransactionCategory: async () => {
+    throw new Error("handleUpdateTransactionCategory not implemented");
+  },
   categories: null,
-});
+};
 
-export function TransactionProvider({
+export const DataContext = createContext<DataContextProps>(
+  defaultDataContextProps,
+);
+
+export const TransactionProvider = ({
   children,
 }: {
   children: React.ReactNode;
-}) {
+}) => {
   const [data, setData] = useState<Transaction[] | null>(null);
   const [categories, setCategories] = useState<Category[] | null>(null);
 
@@ -176,4 +177,4 @@ export function TransactionProvider({
       {children}
     </DataContext.Provider>
   );
-}
+};

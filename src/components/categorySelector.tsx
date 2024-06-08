@@ -42,7 +42,7 @@ export const CategoryDisplay = ({ category }: { category: Category }) => {
   );
 };
 
-export default function CategorySelector({
+export const CategorySelector = ({
   selectedCategory,
   onChange,
   placeholder = "Select Category", // Add this line
@@ -51,7 +51,7 @@ export default function CategorySelector({
   onChange: (category: Category | null) => void;
 
   placeholder?: string; // And this line
-}) {
+}) => {
   const [open, setOpen] = useState(false);
   const { categories } = useContext(DataContext);
 
@@ -139,4 +139,4 @@ export default function CategorySelector({
       </Modal>
     </div>
   );
-}
+};

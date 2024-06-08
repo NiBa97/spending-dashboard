@@ -13,13 +13,13 @@ import {
   Tr,
 } from "@chakra-ui/react";
 
-import { Table as TanstackTable } from "@tanstack/react-table";
+import { type Table as TanstackTable } from "@tanstack/react-table";
 import { flexRender } from "@tanstack/react-table";
 import { FaSort } from "react-icons/fa";
 import React from "react";
 import type { IconType } from "react-icons";
-import { Category, Transaction } from "~/components/types";
-import CategorySelector from "~/components/categorySelector";
+import { type Category, type Transaction } from "~/components/types";
+import { CategorySelector } from "~/components/categorySelector";
 const MainTable = ({ table }: { table: TanstackTable<Transaction> }) => {
   const updateAllFilteredCategories = async (newCategory: Category | null) => {
     if (
@@ -145,7 +145,7 @@ const MainTable = ({ table }: { table: TanstackTable<Transaction> }) => {
         <CategorySelector
           placeholder="Update categories in selection"
           selectedCategory={null}
-          onChange={(category) => {
+          onChange={(category: Category | null) => {
             void updateAllFilteredCategories(category);
           }}
         />

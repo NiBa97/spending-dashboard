@@ -1,21 +1,10 @@
 //Create a plot to show the negative transactions per day, each bar should be colorized by its category
 
-import {
-  Menu,
-  Heading,
-  Box,
-  MenuButton,
-  Button,
-  MenuList,
-  MenuItem,
-  Text,
-  SimpleGrid,
-} from "@chakra-ui/react";
+import { Box, Text, SimpleGrid } from "@chakra-ui/react";
 import dynamic from "next/dynamic";
 import { useState, useEffect } from "react";
-import { FaChevronDown } from "react-icons/fa";
 
-import { Transaction } from "~/components/types";
+import { type Transaction } from "~/components/types";
 
 const Plot = dynamic(() => import("react-plotly.js"), { ssr: false });
 interface Trace {
@@ -36,12 +25,12 @@ function transactions_to_traces(
     amount: number;
   }[],
 ): Record<string, Trace> {
-  const traces_data: Record<string, Trace> = sampledTransactions.reduce(
-    (trans_traces: Record<string, Trace>, transaction) => {
+  const tracesData: Record<string, Trace> = sampledTransactions.reduce(
+    (transTraces: Record<string, Trace>, transaction) => {
       const category = transaction.category?.name ?? "No category";
       const date = transaction.date.toISOString();
-      if (!trans_traces[category]) {
-        trans_traces[category] = {
+      if (!transTraces[category]) {
+        transTraces[category] = {
           x: [],
           y: [],
           type: "bar",
@@ -51,19 +40,19 @@ function transactions_to_traces(
       }
 
       //Check if date is already in x array and get the index of the value
-      const index = trans_traces[category]!.x.indexOf(date);
+      const index = transTraces[category]!.x.indexOf(date);
       if (index === -1) {
-        trans_traces[category]!.x.push(date);
-        trans_traces[category]!.y.push(transaction.amount * -1);
+        transTraces[category]!.x.push(date);
+        transTraces[category]!.y.push(transaction.amount * -1);
       } else {
-        trans_traces[category]!.y[index] += transaction.amount * -1;
+        transTraces[category]!.y[index] += transaction.amount * -1;
       }
 
-      return trans_traces;
+      return transTraces;
     },
     {},
   );
-  return traces_data;
+  return tracesData;
 }
 export const NegativeTransactionsPerInterval = ({
   transactions,
@@ -93,7 +82,7 @@ export const NegativeTransactionsPerInterval = ({
   const traces = transactions_to_traces(sampledTransactions);
 
   //Group transactions by category
-  const categorized_transactions = transactions.reduce(
+  const categorizedTransactions = transactions.reduce(
     (acc, transaction) => {
       if (transaction.amount > 0) return acc;
 
@@ -113,7 +102,7 @@ export const NegativeTransactionsPerInterval = ({
     {} as Record<string, { amount: number; color: string }>,
   );
 
-  console.log(categorized_transactions);
+  console.log(categorizedTransactions);
 
   return (
     <>
@@ -140,7 +129,7 @@ export const NegativeTransactionsPerInterval = ({
       />
 
       <SimpleGrid columns={5} gap={4}>
-        {Object.entries(categorized_transactions).map(([category, summary]) => (
+        {Object.entries(categorizedTransactions).map(([category, summary]) => (
           <Box
             key={category}
             bg={summary.color}

@@ -68,10 +68,11 @@ import { useRouter } from "next/router";
 import { FaTableList } from "react-icons/fa6";
 
 const MyApp: AppType<{ session: Session | null }> = ({
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   Component,
   pageProps: { session, ...pageProps },
 }) => {
-  const user = session?.user;
+  // const user = session?.user;
   return (
     <SessionProvider session={session}>
       <ChakraProvider>
